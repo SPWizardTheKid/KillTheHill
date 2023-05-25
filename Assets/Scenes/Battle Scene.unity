@@ -942,15 +942,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enemyActions:
   - intentType: 0
-    amount: 0
+    amount: 10
     debuffAmount: 0
-    chance: 0
+    chance: 5
     icon: {fileID: 0}
-  - intentType: 0
-    amount: 0
-    debuffAmount: 0
-    chance: 0
-    icon: {fileID: 0}
+  turns: []
+  turnNumber: 0
+  shuffleActions: 1
+  midTurn: 0
+  currentEnemy: {fileID: 0}
 --- !u!114 &340672431
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4368,6 +4368,7 @@ MonoBehaviour:
   handTransform: {fileID: 479300154}
   selectedCard: {fileID: 0}
   cardTarget: {fileID: 0}
+  player: {fileID: 1107063188}
   turn: 0
 --- !u!4 &2134453387
 Transform:

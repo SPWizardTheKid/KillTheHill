@@ -28,6 +28,7 @@ public class GameManager : MonoBehaviour
 
     public CardUI selectedCard;
     public Fighter cardTarget;
+    public Fighter player;
     private CardAction cardAction;
 
     public Turn turn;
@@ -45,6 +46,14 @@ public class GameManager : MonoBehaviour
         discardPile = new List<Card>();
         drawPile = new List<Card>();
         hand = new List<Card>();
+
+        var enemyArray = FindObjectsOfType<Enemy>();
+        enemies = new List<Enemy>();
+
+        foreach (var enemy in enemyArray)
+        {
+            enemies.Add(enemy);
+        }
 
         drawPileText.text = drawPile.Count.ToString();
         discardPileText.text = discardPile.Count.ToString();
@@ -164,6 +173,17 @@ public class GameManager : MonoBehaviour
     private IEnumerator HandleEnemyTurn()
     {
         yield return new WaitForSeconds(1.5f);
+
+        foreach (Enemy enemy in enemies)
+        {
+            enemy.midTurn = true;
+            enemy.TakeTurn();
+            while (enemy.midTurn)
+            {
+                yield return new WaitForEndOfFrame();
+            }
+                
+        }
 
         Debug.Log("Turn over");
         ChangeTurn();
