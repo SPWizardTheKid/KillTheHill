@@ -8,14 +8,25 @@ public class Fighter : MonoBehaviour
     public int maxHealth;
 
     private Enemy enemy;
-    public GameManager gameManager;
+    private GameManager gameManager;
     public FighterHealthBar fighterHealthBar;
+
+    [Header("Effects")]
+    public Effect strength;
+    public Effect vulnerable;
+    public Effect weak;
+    public Effect parry;
+
+    public GameObject effectPrefab;
+    public Transform effectParent;
+
 
     public bool isPlayer;
 
     private void Awake()
     {
         enemy = GetComponent<Enemy>();
+        gameManager = FindObjectOfType<GameManager>();
 
         currentHealth = maxHealth;
         fighterHealthBar.healthSlider.maxValue = maxHealth;
@@ -24,12 +35,12 @@ public class Fighter : MonoBehaviour
             gameManager.DisplayHealth(currentHealth, currentHealth);
     }
 
-    public void TakeDamage(int amount)
+    public void TakeDamage(int value)
     {
 
-        Debug.Log($"dealt {amount} damage");
+        Debug.Log($"dealt {value} damage");
 
-        currentHealth -= amount;
+        currentHealth -= value;
         UpdateHealthUI(currentHealth);
 
         if (currentHealth <= 0)
@@ -40,6 +51,38 @@ public class Fighter : MonoBehaviour
                 gameManager.EndFight(false);
 
             Destroy(gameObject);
+        }
+    }
+
+    public void AddEffect(Effect.Type type, int value)
+    {
+        if (type == Effect.Type.vulnerable)
+        {
+            if (vulnerable.effectValue <= 0)
+            {
+                vulnerable.effectDisplay = Instantiate(effectPrefab, effectParent).GetComponent<EffectUI>();
+            }
+            vulnerable.effectValue += value;
+            vulnerable.effectDisplay.DisplayEffect(vulnerable);
+        }
+        else if (type == Effect.Type.weak)
+        {
+            if (weak.effectValue <= 0)
+            {
+                weak.effectDisplay = Instantiate(effectPrefab, effectParent).GetComponent<EffectUI>();
+            }
+            weak.effectValue += value;
+            weak.effectDisplay.DisplayEffect(weak);
+        }
+        else if (type == Effect.Type.strength)
+        {
+            if (strength.effectValue <= 0)
+            {
+                //create new buff object
+                strength.effectDisplay = Instantiate(effectPrefab, effectParent).GetComponent<EffectUI>();
+            }
+            strength.effectValue += value;
+            strength.effectDisplay.DisplayEffect(strength);
         }
     }
 

@@ -9,6 +9,7 @@ public class EnemyAction
     public enum IntentType { Attack, Defend, SelfBuff, Debuff, AttackDebuff }
     public int amount;
     public int debuffAmount;
+    public Effect.Type type;
     public int chance;
     public Sprite icon;
 }

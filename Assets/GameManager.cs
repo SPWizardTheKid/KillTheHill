@@ -55,6 +55,13 @@ public class GameManager : MonoBehaviour
             enemies.Add(enemy);
         }
 
+        foreach (var enemy in enemies)
+        {
+            enemy.DisplayIntent();
+        }
+
+
+
         drawPileText.text = drawPile.Count.ToString();
         discardPileText.text = discardPile.Count.ToString();
         haste = maxHaste;
@@ -153,10 +160,10 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            //foreach (Enemy e in enemies)
-            //{
-            //    e.DisplayIntent();
-            //}
+            foreach (Enemy e in enemies)
+            {
+                e.DisplayIntent();
+            }
 
             turn = Turn.player;
 
