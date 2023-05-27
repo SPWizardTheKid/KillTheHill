@@ -145,24 +145,25 @@ public class GameManager : MonoBehaviour
             }
 
 
-            //foreach (Enemy e in enemies)
-            //{
-            //    if (e.thisEnemy == null)
-            //        e.thisEnemy = e.GetComponent<Fighter>();
+            foreach (Enemy enemy in enemies)
+            {
+                if (enemy.currentEnemy == null)
+                {
+                    enemy.currentEnemy = enemy.GetComponent<Fighter>();
+                }
 
-            //    //reset block
-            //    e.thisEnemy.currentBlock = 0;
-            //    e.thisEnemy.fighterHealthBar.DisplayBlock(0);
-            //}
+                //reset defence
+                enemy.currentEnemy.isDefending = false;
+            }
 
 
             StartCoroutine(HandleEnemyTurn());
         }
         else
         {
-            foreach (Enemy e in enemies)
+            foreach (Enemy enemy in enemies)
             {
-                e.DisplayIntent();
+                enemy.DisplayIntent();
             }
 
             turn = Turn.player;

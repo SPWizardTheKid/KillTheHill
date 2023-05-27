@@ -20,7 +20,7 @@ public class Fighter : MonoBehaviour
     public GameObject effectPrefab;
     public Transform effectParent;
 
-
+    public bool isDefending;
     public bool isPlayer;
 
     private void Awake()
@@ -37,6 +37,7 @@ public class Fighter : MonoBehaviour
 
     public void TakeDamage(int value)
     {
+        if (isDefending) value = (int)(value * 0.5);
 
         Debug.Log($"dealt {value} damage");
 
@@ -45,10 +46,10 @@ public class Fighter : MonoBehaviour
 
         if (currentHealth <= 0)
         {
-            if (enemy != null)
-                gameManager.EndFight(true);
-            else
-                gameManager.EndFight(false);
+            if (enemy != null) gameManager.EndFight(true);
+
+            else gameManager.EndFight(false);
+
 
             Destroy(gameObject);
         }

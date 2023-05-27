@@ -51,7 +51,8 @@ public class Enemy : MonoBehaviour
                 StartCoroutine(AttackPlayer());
                 break;
             case EnemyAction.IntentType.Defend:
-                print("defence");
+                Defend();
+                StartCoroutine(ApplyEffect());
                 break;
             case EnemyAction.IntentType.SelfBuff:
                 ApplyBuffToSelf(turns[turnNumber].type);
@@ -114,6 +115,11 @@ public class Enemy : MonoBehaviour
             LoadEnemy();
 
         player.AddEffect(type, turns[turnNumber].debuffAmount);
+    }
+
+    public void Defend()
+    {
+        currentEnemy.isDefending = true;
     }
 
     public void DisplayIntent()

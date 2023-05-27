@@ -987,6 +987,7 @@ MonoBehaviour:
   effectPrefab: {fileID: 4249612279881808265, guid: 3fdf5fdbf6119ed4e9cb75381a59fda2,
     type: 3}
   effectParent: {fileID: 370577069}
+  isDefending: 0
   isPlayer: 0
 --- !u!114 &340672430
 MonoBehaviour:
@@ -1001,17 +1002,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enemyActions:
-  - intentType: 2
-    amount: 3
+  - intentType: 1
+    amount: 0
     debuffAmount: 0
     type: 0
-    chance: 2
-    icon: {fileID: 21300000, guid: 3afe9266576aa4041b27d5775e70022c, type: 3}
+    chance: 1
+    icon: {fileID: 21300000, guid: 1b089476ac82da14b989f88f8bc03739, type: 3}
   - intentType: 0
     amount: 5
     debuffAmount: 0
     type: 0
-    chance: 4
+    chance: 1
     icon: {fileID: 21300000, guid: d02ac31126cfd4b408a2ab6d8ff409d6, type: 3}
   turns: []
   turnNumber: 0
@@ -2376,6 +2377,7 @@ MonoBehaviour:
   effectPrefab: {fileID: 4249612279881808265, guid: 3fdf5fdbf6119ed4e9cb75381a59fda2,
     type: 3}
   effectParent: {fileID: 544953050}
+  isDefending: 0
   isPlayer: 1
 --- !u!1001 &1171019669
 PrefabInstance:
