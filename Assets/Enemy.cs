@@ -24,11 +24,6 @@ public class Enemy : MonoBehaviour
 
     private Fighter player;
     private GameManager gameManager;
-
-
-
-
-
     private void Awake()
     {
         LoadEnemy();
@@ -59,10 +54,13 @@ public class Enemy : MonoBehaviour
                 StartCoroutine(ApplyEffect());        
                 break;
             case EnemyAction.IntentType.Debuff:
-                
+                ApplyDebuffToPlayer(turns[turnNumber].type);
+                StartCoroutine(ApplyEffect());
                 break;
             case EnemyAction.IntentType.AttackDebuff:
-               
+                ApplyDebuffToPlayer(turns[turnNumber].type);
+                StartCoroutine(AttackPlayer());
+                    
                 break;
             default:
                 break;
@@ -73,6 +71,7 @@ public class Enemy : MonoBehaviour
     {
         foreach (EnemyAction action in enemyActions)
         {
+            if (action.chance < 1) action.chance = 1;
             for (int i = 0; i < action.chance; i++)
             {
                 turns.Add(action);
@@ -86,6 +85,7 @@ public class Enemy : MonoBehaviour
         //animation
 
 
+
         var totalDamage = turns[turnNumber].amount + currentEnemy.strength.effectValue;
         if (player.vulnerable.effectValue > 0)
         {
@@ -93,10 +93,25 @@ public class Enemy : MonoBehaviour
             totalDamage = (int)a;
         }
 
-        yield return new WaitForSeconds(0.5f);
-        player.TakeDamage(totalDamage);
-        yield return new WaitForSeconds(0.5f);
-        WrapUpTurn();
+        if (turns[turnNumber].quantity > 1)
+        {
+            for (int i = 0; i < turns[turnNumber].quantity; i++)
+            {
+                yield return new WaitForSeconds(0.5f);
+                player.TakeDamage(totalDamage);
+                yield return new WaitForSeconds(0.5f);
+            }
+            WrapUpTurn();
+        }
+        else
+        {
+            yield return new WaitForSeconds(0.5f);
+            player.TakeDamage(totalDamage);
+            yield return new WaitForSeconds(0.5f);
+            WrapUpTurn();
+
+        }
+
     }
 
     private IEnumerator ApplyEffect()
@@ -132,15 +147,25 @@ public class Enemy : MonoBehaviour
 
         if (turns[turnNumber].intentType == EnemyAction.IntentType.Defend) intentValue.enabled = false;
 
-        if (turns[turnNumber].intentType == EnemyAction.IntentType.Attack)
+        if (turns[turnNumber].intentType == EnemyAction.IntentType.Attack || turns[turnNumber].intentType == EnemyAction.IntentType.AttackDebuff)
         {
             //add strength to attack value
             var totalDamage = turns[turnNumber].amount + currentEnemy.strength.effectValue;
             if (player.vulnerable.effectValue > 0)
             {
                 totalDamage = (int)(totalDamage * 1.5f);
+                //intentValue.text = totalDamage.ToString();
             }
-            intentValue.text = totalDamage.ToString();
+
+            if (turns[turnNumber].quantity > 1)
+            { 
+                intentValue.text = $"{totalDamage}x{turns[turnNumber].quantity}"; 
+            }
+            else
+            {
+                intentValue.text = totalDamage.ToString();
+            }
+                
         }
         else
         {
@@ -159,7 +184,7 @@ public class Enemy : MonoBehaviour
             turnNumber = 0;
 
 
-        //currentEnemy.EvaluateBuffsAtTurnEnd();
+        currentEnemy.EvaluateEffectsAtTurnEnd();
         midTurn = false;
     }
 }

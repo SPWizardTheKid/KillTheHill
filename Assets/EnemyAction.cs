@@ -8,6 +8,7 @@ public class EnemyAction
     public IntentType intentType;
     public enum IntentType { Attack, Defend, SelfBuff, Debuff, AttackDebuff }
     public int amount;
+    public int quantity;
     public int debuffAmount;
     public Effect.Type type;
     public int chance;

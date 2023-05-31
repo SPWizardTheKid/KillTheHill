@@ -23,7 +23,6 @@ public class CardTarget : MonoBehaviour
 
         if (gameManager.selectedCard != null && gameManager.selectedCard.card.cardType == "Attack")
         {
-            //target == enemy
             gameManager.cardTarget = enemyFighter;
             Debug.Log("set target");
         }

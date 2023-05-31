@@ -12,9 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a6ea4836ef2b2841a42f00749998dc9, type: 3}
   m_Name: Test 2
   m_EditorClassIdentifier: 
-  cardName: 3
-  cardDescription: asd
+  cardName: Defend
+  cardDescription: Receive reduced damage this turn
   cardSprite: {fileID: 0}
-  cardType: 
+  cardType: Skill
   amount: 0
-  cardCost: 1

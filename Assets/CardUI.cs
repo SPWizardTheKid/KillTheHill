@@ -17,7 +17,7 @@ public class CardUI : MonoBehaviour
 
     private Vector3 initialPos;
     private bool startTimer;
-
+    public bool posSet = false;
 
     private void Awake()
     {
@@ -48,17 +48,11 @@ public class CardUI : MonoBehaviour
 
     public void PointerDown()
     {
-        initialPos = transform.position;
+
+        if (!posSet) initialPos = transform.position;
+        posSet = true;
         gameManager.selectedCard = this;
         print(":D");
-    }
-
-    public void PointerUp()
-    {
-        if (gameManager.cardTarget != null && card.cardType == "Attack" && transform.localPosition.y > 400)
-        {
-            gameManager.PlayCard(this);
-        }
     }
 
     public void Drag()

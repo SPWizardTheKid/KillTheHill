@@ -17,7 +17,6 @@ public class Card : ScriptableObject
 
     public int amount;
 
-    public int cardCost;
 
 
 }

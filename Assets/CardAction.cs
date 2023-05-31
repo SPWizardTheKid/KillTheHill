@@ -25,16 +25,29 @@ public class CardAction : MonoBehaviour
             case "Slash":
                 AttackEnemy();
                 break;
+            case "Defend":
+                Defend();
+                break;
 
             default:
                 break;
         }
     }
 
+    private void Defend()
+    {
+        player.isDefending = true;
+    }
+
     private void AttackEnemy()
     {
-        var totalDamage = card.amount;
-
+        var totalDamage = card.amount + player.strength.effectValue;
+        if (target.vulnerable.effectValue > 0)
+        {
+            float a = totalDamage * 1.5f;
+            Debug.Log("incrased damage from " + totalDamage + " to " + (int)a);
+            totalDamage = (int)a;
+        }
         target.TakeDamage(totalDamage);
     }
 }

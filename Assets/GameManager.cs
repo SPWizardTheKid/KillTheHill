@@ -1,8 +1,10 @@
 using Map;
+using Newtonsoft.Json;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
@@ -13,6 +15,8 @@ public class GameManager : MonoBehaviour
     public List<CardUI> handGameObjects = new List<CardUI>();
     public List<Card> discardPile = new List<Card>();
     public List<Enemy> enemies = new List<Enemy>();
+    public List<GameObject> possibleEnemies;
+    public List<GameObject> possibleElites;
 
     public TMP_Text drawPileText;
     public TMP_Text discardPileText;
@@ -25,11 +29,16 @@ public class GameManager : MonoBehaviour
     public int maxHaste = 3;
 
     public Transform handTransform;
+    public Transform enemyParent;
+    public EndScreen endScreen;
 
     public CardUI selectedCard;
     public Fighter cardTarget;
     public Fighter player;
     private CardAction cardAction;
+
+    private StatManager statManager;
+    
 
     public Turn turn;
     public enum Turn {player, enemy};
@@ -37,16 +46,23 @@ public class GameManager : MonoBehaviour
     private void Awake()
     {
         cardAction = GetComponent<CardAction>();
+        statManager = FindObjectOfType<StatManager>();
 
         foreach (var cardUi in handGameObjects)
         {
             cardUi.gameObject.SetActive(false);
         }
 
+        var newEnemy = Instantiate(possibleEnemies[Random.Range(0, possibleEnemies.Count)], enemyParent);
+
+        deck = statManager.playerDeck;
+
         discardPile = new List<Card>();
         drawPile = new List<Card>();
         hand = new List<Card>();
 
+
+            
         var enemyArray = FindObjectsOfType<Enemy>();
         enemies = new List<Enemy>();
 
@@ -156,7 +172,8 @@ public class GameManager : MonoBehaviour
                 enemy.currentEnemy.isDefending = false;
             }
 
-
+            
+            player.EvaluateEffectsAtTurnEnd();  
             StartCoroutine(HandleEnemyTurn());
         }
         else
@@ -172,6 +189,7 @@ public class GameManager : MonoBehaviour
             hasteText.text = haste.ToString();
 
             endTurnButton.interactable = true;
+            player.isDefending = false;
             DrawCards(drawAmount);
 
 
@@ -180,7 +198,7 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator HandleEnemyTurn()
     {
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(1f);
 
         foreach (Enemy enemy in enemies)
         {
@@ -205,10 +223,11 @@ public class GameManager : MonoBehaviour
     public void PlayCard(CardUI cardUI)
     {
         Debug.Log("played card");
+        cardUI.posSet = false;
 
         cardAction.PerformAction(cardUI.card, cardTarget);
 
-        haste -= cardUI.card.cardCost;
+        haste -= 1;
         hasteText.text = haste.ToString();
 
         selectedCard = null;
@@ -219,9 +238,43 @@ public class GameManager : MonoBehaviour
 
     }
 
+    //public void SaveStats()
+    //{
+    //    var json = JsonUtility.ToJson(statManager);
+
+    //    PlayerPrefs.SetString("Stats", json);
+    //    PlayerPrefs.Save();
+    //}
+
+
+    
+    //public void GetStats()
+    //{
+    //    if (PlayerPrefs.HasKey("Stats"))
+    //    {
+    //        var statsJson = PlayerPrefs.GetString("Stats");
+    //        var stats = JsonUtility.FromJson<StatManager>(statsJson);
+    //        statManager.goldAmount = stats.goldAmount;
+    //        statManager.playerDeck = stats.playerDeck;
+    //        statManager.cardLibrary = stats.cardLibrary;
+    //        statManager.relics = stats.relics;
+    //        statManager.relicLibrary = stats.relicLibrary;
+    //    }
+    //}
+
     public void EndFight(bool win)
     {
-        print("ended");
+        if(win)
+        {
+            endScreen.gameObject.SetActive(true);
+            endScreen.goldReward.gameObject.SetActive(true);
+            endScreen.cardReward.gameObject.SetActive(true);
+
+            var goldValue = Random.Range(12, 45);
+            endScreen.goldReward.rewardName.text = goldValue.ToString() + " Gold";
+            statManager.UpdateGoldValue(goldValue);
+            
+        }
     }
 
 }

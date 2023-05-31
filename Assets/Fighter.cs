@@ -87,6 +87,47 @@ public class Fighter : MonoBehaviour
         }
     }
 
+    public void EvaluateEffectsAtTurnEnd()
+    {
+        if (vulnerable.effectValue > 0)
+        {
+            vulnerable.effectValue -= 1;
+            vulnerable.effectDisplay.DisplayEffect(vulnerable);
+
+            if (vulnerable.effectValue <= 0)
+                Destroy(vulnerable.effectDisplay.gameObject);
+        }
+        else if (weak.effectValue > 0)
+        {
+            weak.effectValue -= 1;
+            weak.effectDisplay.DisplayEffect(weak);
+
+            if (weak.effectValue <= 0)
+                Destroy(weak.effectDisplay.gameObject);
+        }
+    }
+
+    public void ResetBuffs()
+    {
+        if (vulnerable.effectValue > 0)
+        {
+            vulnerable.effectValue = 0;
+            Destroy(vulnerable.effectDisplay.gameObject);
+        }
+        else if (weak.effectValue > 0)
+        {
+            weak.effectValue = 0;
+            Destroy(weak.effectDisplay.gameObject);
+        }
+        else if (strength.effectValue > 0)
+        {
+            strength.effectValue = 0;
+            Destroy(strength.effectDisplay.gameObject);
+        }
+
+        isDefending = false;
+    }
+
     public void UpdateHealthUI(int newAmount)
     {
         currentHealth = newAmount;
