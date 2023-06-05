@@ -13,8 +13,9 @@ public class PlayerStats
 	public int floorNumber = 1;
 	public int goldAmount;
 	public int playerCurrentHealth;
+    public int playerMaxHealth;
 
-    public PlayerStats(List<Card> deck, List<Card> library, List<Relic> relicsList, List<Relic> rLibrary, int floor, int gold, int currentHealth)
+    public PlayerStats(List<Card> deck, List<Card> library, List<Relic> relicsList, List<Relic> rLibrary, int floor, int gold, int currentHealth, int maxHealth)
     {
         playerDeck = deck;
         cardLibrary = library;
@@ -23,6 +24,7 @@ public class PlayerStats
         floorNumber = floor;
         goldAmount = gold;
         playerCurrentHealth = currentHealth;
+        playerMaxHealth = maxHealth;
     }
 }
 

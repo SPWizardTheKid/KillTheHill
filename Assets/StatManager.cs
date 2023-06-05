@@ -15,6 +15,9 @@ public class StatManager : MonoBehaviour
 	public int floorNumber = 1;
 	public int goldAmount;
     public int playerCurrentHealth;
+    public int playerMaxHealth;
+    public int defaultHealth = 100;
+    public int defaultMaxHealth = 100;
 	private PlayerStatsUI playerStatsUI;
     private GameManager gameManager;
 
@@ -39,8 +42,10 @@ public class StatManager : MonoBehaviour
                 relics = stats.relics;
                 relicLibrary = stats.relicLibrary;
                 playerCurrentHealth = stats.playerCurrentHealth;
+                playerMaxHealth = stats.playerMaxHealth;
 
                 gameManager.player.currentHealth = playerCurrentHealth;
+                gameManager.player.maxHealth = playerMaxHealth;
                 gameManager.player.UpdateHealthUI(playerCurrentHealth);
                 gameManager.DisplayHealth(playerCurrentHealth, gameManager.player.maxHealth);
             }
@@ -63,13 +68,16 @@ public class StatManager : MonoBehaviour
                 relics = stats.relics;
                 relicLibrary = stats.relicLibrary;
                 playerCurrentHealth = stats.playerCurrentHealth;
+                playerMaxHealth = stats.playerMaxHealth;
 
-                playerStatsUI.healthDisplayText.text = $"{playerCurrentHealth}/{100}";
+                UpdateHealthValue(playerCurrentHealth, playerMaxHealth);
             }
 
             else
             {
-                playerStatsUI.healthDisplayText.text = $"{100}/{100}";
+                playerCurrentHealth = defaultHealth;
+                playerMaxHealth = defaultMaxHealth;
+                UpdateHealthValue(defaultHealth, defaultMaxHealth);
             }
         }
         
@@ -79,13 +87,22 @@ public class StatManager : MonoBehaviour
     private void Start()
     {
 
+    }
 
+    public void UpdateHealthValue(int hp, int maxHp)
+    {
+        playerStatsUI.healthDisplayText.text = $"{hp} / {maxHp}";
     }
     public void UpdateGoldValue(int newGold)
     {
         goldAmount += newGold;
         playerStatsUI.goldAmountText.text = goldAmount.ToString();
     }
+
+    public void GameOver()
+    {
+
+    }    
 
 
     public void LoadMainScene()
@@ -95,12 +112,32 @@ public class StatManager : MonoBehaviour
         SceneManager.LoadScene("Main Scene");
     }
 
+    public void LoadBattleScene()
+    {
+        SaveStats();
+
+        SceneManager.LoadScene("Battle Scene");
+    }
+
     public void SaveStats()
     {
-        var stats = new PlayerStats(playerDeck, cardLibrary, relics, relicLibrary, floorNumber, goldAmount, gameManager.player.currentHealth);
-        var json = JsonUtility.ToJson(stats);
+        if (SceneManager.GetActiveScene().name == "Battle Scene")
+        {
+            var stats = new PlayerStats(playerDeck, cardLibrary, relics, relicLibrary, floorNumber, goldAmount, gameManager.player.currentHealth, gameManager.player.maxHealth);
+            var json = JsonUtility.ToJson(stats);
 
-        PlayerPrefs.SetString("Stats", json);
-        PlayerPrefs.Save();
+            PlayerPrefs.SetString("Stats", json);
+            PlayerPrefs.Save();
+
+        }
+        
+        else
+        {
+            var stats = new PlayerStats(playerDeck, cardLibrary, relics, relicLibrary, floorNumber, goldAmount, playerCurrentHealth, playerMaxHealth);
+            var json = JsonUtility.ToJson(stats);
+
+            PlayerPrefs.SetString("Stats", json);
+            PlayerPrefs.Save();
+        }
     }
 }

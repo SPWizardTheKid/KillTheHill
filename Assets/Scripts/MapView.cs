@@ -48,6 +48,7 @@ namespace Map
         [Tooltip("Unavailable path color")]
         public Color32 lineLockedColor = Color.gray;
 
+
         protected GameObject firstParent;
         protected GameObject mapParent;
         private List<List<Point>> paths;
@@ -111,6 +112,7 @@ namespace Map
             var backgroundObject = new GameObject("Background");
             backgroundObject.transform.SetParent(mapParent.transform);
             var bossNode = MapNodes.FirstOrDefault(node => node.Node.nodeType == NodeType.Boss);
+            mapManager.bossName = bossNode.Blueprint.name;
             var span = m.DistanceBetweenFirstAndLastLayers();
             backgroundObject.transform.localPosition = new Vector3(bossNode.transform.localPosition.x, span / 2f, 0f);
             backgroundObject.transform.localRotation = Quaternion.identity;

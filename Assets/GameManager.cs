@@ -2,6 +2,7 @@ using Map;
 using Newtonsoft.Json;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -17,6 +18,7 @@ public class GameManager : MonoBehaviour
     public List<Enemy> enemies = new List<Enemy>();
     public List<GameObject> possibleEnemies;
     public List<GameObject> possibleElites;
+    public List<GameObject> specialEncounters;
 
     public TMP_Text drawPileText;
     public TMP_Text discardPileText;
@@ -38,6 +40,7 @@ public class GameManager : MonoBehaviour
     private CardAction cardAction;
 
     private StatManager statManager;
+    private PlayerStatsUI playerStatsUI;
     
 
     public Turn turn;
@@ -45,15 +48,32 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
+
         cardAction = GetComponent<CardAction>();
         statManager = FindObjectOfType<StatManager>();
+        playerStatsUI = FindObjectOfType<PlayerStatsUI>();
 
         foreach (var cardUi in handGameObjects)
         {
             cardUi.gameObject.SetActive(false);
         }
 
-        var newEnemy = Instantiate(possibleEnemies[Random.Range(0, possibleEnemies.Count)], enemyParent);
+        if(PlayerPrefs.HasKey("Special"))
+        {
+            var specialEnemy = PlayerPrefs.GetString("Special");
+
+            if (specialEnemy == "Vergil")
+            {
+                var enemy = Instantiate(specialEncounters[0], enemyParent);
+            }
+        }
+
+        else
+        {
+            var newEnemy = Instantiate(possibleEnemies[Random.Range(0, possibleEnemies.Count)], enemyParent);
+        }
+
+        
 
         deck = statManager.playerDeck;
 
@@ -238,41 +258,48 @@ public class GameManager : MonoBehaviour
 
     }
 
-    //public void SaveStats()
-    //{
-    //    var json = JsonUtility.ToJson(statManager);
-
-    //    PlayerPrefs.SetString("Stats", json);
-    //    PlayerPrefs.Save();
-    //}
-
-
-    
-    //public void GetStats()
-    //{
-    //    if (PlayerPrefs.HasKey("Stats"))
-    //    {
-    //        var statsJson = PlayerPrefs.GetString("Stats");
-    //        var stats = JsonUtility.FromJson<StatManager>(statsJson);
-    //        statManager.goldAmount = stats.goldAmount;
-    //        statManager.playerDeck = stats.playerDeck;
-    //        statManager.cardLibrary = stats.cardLibrary;
-    //        statManager.relics = stats.relics;
-    //        statManager.relicLibrary = stats.relicLibrary;
-    //    }
-    //}
-
     public void EndFight(bool win)
     {
         if(win)
         {
             endScreen.gameObject.SetActive(true);
             endScreen.goldReward.gameObject.SetActive(true);
-            endScreen.cardReward.gameObject.SetActive(true);
+            
+            if (PlayerPrefs.HasKey("Special"))
+            {
+                var specialEnemy = PlayerPrefs.GetString("Special");
 
-            var goldValue = Random.Range(12, 45);
-            endScreen.goldReward.rewardName.text = goldValue.ToString() + " Gold";
-            statManager.UpdateGoldValue(goldValue);
+                if (specialEnemy == "Vergil")
+                {
+                    var goldValue = 69;
+                    endScreen.goldReward.rewardName.text = goldValue.ToString() + " Gold";
+                    statManager.UpdateGoldValue(goldValue);
+
+                    var relicReward = statManager.relicLibrary.Where(r => r.relicName == "Yamato").FirstOrDefault();
+                    endScreen.relicReward.gameObject.SetActive(true);
+                    endScreen.cardReward.gameObject.SetActive(false);
+                    endScreen.relicReward.DisplayRelic(relicReward);
+
+                    statManager.relics.Add(relicReward);
+                    statManager.relicLibrary.Remove(relicReward);
+
+                    playerStatsUI.DisplayRelics();
+
+                    PlayerPrefs.DeleteKey("Special");
+                    
+                }
+            }
+
+            else
+            {
+                endScreen.relicReward.gameObject.SetActive(false);
+                endScreen.cardReward.gameObject.SetActive(true);
+                var goldValue = Random.Range(12, 45);
+                endScreen.goldReward.rewardName.text = goldValue.ToString() + " Gold";
+                statManager.UpdateGoldValue(goldValue);
+            }
+
+            
             
         }
     }

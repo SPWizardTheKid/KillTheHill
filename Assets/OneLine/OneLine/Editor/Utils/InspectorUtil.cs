@@ -42,7 +42,7 @@ Please create an issue on https://github.com/slavniyteo/one-line/ and we will re
                 enabled = true;
             }
             catch (Exception ex){
-                Debug.LogError(INITIALIZATION_ERROR_MESSAGE + ex.ToString());
+                //Debug.LogError(INITIALIZATION_ERROR_MESSAGE + ex.ToString());
             }
         }
 

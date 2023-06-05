@@ -17,6 +17,8 @@ public class Card : ScriptableObject
 
     public int amount;
 
+    public Color rarity;
+
 
 
 }

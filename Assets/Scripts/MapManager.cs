@@ -8,6 +8,7 @@ namespace Map
     {
         public MapConfig config;
         public MapView view;
+        public string bossName;
 
         public Map CurrentMap { get; private set; }
 
@@ -29,6 +30,7 @@ namespace Map
                     // player has not reached the boss yet, load the current map
                     view.ShowMap(map);
                 }
+
             }
             else
             {

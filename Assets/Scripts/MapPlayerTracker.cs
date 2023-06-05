@@ -12,6 +12,7 @@ namespace Map
         public float enterNodeDelay = 1f;
         public MapManager mapManager;
         public MapView view;
+        private static MainSceneManager manager;
 
         public static MapPlayerTracker Instance;
 
@@ -19,11 +20,13 @@ namespace Map
 
         private void Awake()
         {
+            manager = FindObjectOfType<MainSceneManager>();
             Instance = this;
         }
 
         public void SelectNode(MapNode mapNode)
         {
+            
             if (Locked) return;
 
             // Debug.Log("Selected node: " + mapNode.Node.point);
@@ -62,6 +65,7 @@ namespace Map
 
         private static void EnterNode(MapNode mapNode)
         {
+            
             // we have access to blueprint name here as well
             Debug.Log("Entering node: " + mapNode.Node.blueprintName + " of type: " + mapNode.Node.nodeType);
             // load appropriate scene with context based on nodeType:
@@ -70,19 +74,22 @@ namespace Map
             switch (mapNode.Node.nodeType)
             {
                 case NodeType.MinorEnemy:
-                    SceneManager.LoadScene("Battle Scene");
+                    //SceneManager.LoadScene("Battle Scene");
+                    
                     break;
                 case NodeType.EliteEnemy:
                     break;
                 case NodeType.RestSite:
                     break;
                 case NodeType.Treasure:
+                    manager.LoadChestScene();
                     break;
                 case NodeType.Store:
                     break;
                 case NodeType.Boss:
                     break;
                 case NodeType.Mystery:
+                    manager.LoadRandomMystery();
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

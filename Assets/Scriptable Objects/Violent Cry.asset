@@ -10,10 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8a6ea4836ef2b2841a42f00749998dc9, type: 3}
-  m_Name: Test 2
+  m_Name: Violent Cry
   m_EditorClassIdentifier: 
-  cardName: Defend
-  cardDescription: Receive reduced damage this turn
+  cardName: Violent Cry
+  cardDescription: Apply 2 Weak to all enemies
   cardSprite: {fileID: 0}
   cardType: Skill
-  amount: 0
+  amount: 2
+  rarity: {r: 0, g: 0, b: 0, a: 0}

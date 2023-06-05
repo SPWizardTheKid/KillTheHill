@@ -31,6 +31,7 @@ public class EndScreen : MonoBehaviour
 
     public void SelectedCard(int cardIndex)
     {
+        print(":D");
         statManager.playerDeck.Add(statManager.cardLibrary[cardIndex]);
         statManager.cardLibrary.Remove(statManager.cardLibrary[cardIndex]);
 
