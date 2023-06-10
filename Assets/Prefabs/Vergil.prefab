@@ -493,7 +493,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 221.12}
+  m_AnchoredPosition: {x: 0, y: 328.49}
   m_SizeDelta: {x: 343.8588, y: 207.1311}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &5046489461173922772
@@ -659,9 +659,12 @@ MonoBehaviour:
     type: 0
     chance: 0
     icon: {fileID: 21300000, guid: 2f2ac4c32db5c594db9022cdff275f51, type: 3}
+  summons: []
   turnNumber: 0
+  isSummon: 0
   shuffleActions: 0
   midTurn: 0
+  enemyName: {fileID: 7084573587228696941}
   currentEnemy: {fileID: 0}
   intentIcon: {fileID: 9003008704154650279}
   intentValue: {fileID: 9003008702636855964}
@@ -681,6 +684,13 @@ MonoBehaviour:
   currentHealth: 10
   maxHealth: 10
   fighterHealthBar: {fileID: 5046489461200326962}
+  damageIndicator: {fileID: 5643496783363362436, guid: 13139328941370942a9c9ad08385b06d,
+    type: 3}
+  parryValue: 0
+  strengthSprite: {fileID: 0}
+  vulnerableSprite: {fileID: 0}
+  weakSprite: {fileID: 0}
+  parrySprite: {fileID: 0}
   strength:
     type: 0
     effectIcon: {fileID: 21300000, guid: 3afe9266576aa4041b27d5775e70022c, type: 3}
@@ -697,6 +707,16 @@ MonoBehaviour:
     effectValue: 0
     effectDisplay: {fileID: 0}
   parry:
+    type: 0
+    effectIcon: {fileID: 0}
+    effectValue: 0
+    effectDisplay: {fileID: 0}
+  vanish:
+    type: 0
+    effectIcon: {fileID: 0}
+    effectValue: 0
+    effectDisplay: {fileID: 0}
+  summon:
     type: 0
     effectIcon: {fileID: 0}
     effectValue: 0

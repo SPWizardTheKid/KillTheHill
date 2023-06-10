@@ -10,6 +10,8 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
+    public bool elite;
+
     public List<Card> deck;
     public List<Card> drawPile = new List<Card>();
     public List<Card> hand = new List<Card>();
@@ -24,14 +26,22 @@ public class GameManager : MonoBehaviour
     public TMP_Text discardPileText;
     public TMP_Text healthText;
     public TMP_Text hasteText;
+    public TMP_Text parryValueText;
+
+    public Animator animator;
+    public TMP_Text turnText;
+
     public Button endTurnButton;
 
     public int drawAmount = 5;
     public int haste;
     public int maxHaste = 3;
 
+    public GameOver gameOver;
     public Transform handTransform;
     public Transform enemyParent;
+    public Transform enemy2Parent;
+    public Transform summonParent;
     public EndScreen endScreen;
 
     public CardUI selectedCard;
@@ -41,7 +51,8 @@ public class GameManager : MonoBehaviour
 
     private StatManager statManager;
     private PlayerStatsUI playerStatsUI;
-    
+
+    private int tempParryValue;
 
     public Turn turn;
     public enum Turn {player, enemy};
@@ -68,9 +79,28 @@ public class GameManager : MonoBehaviour
             }
         }
 
+        else if (elite)
+        {
+            var elite = Instantiate(possibleElites[Random.Range(0, possibleElites.Count)], enemyParent);
+        }
+
         else
         {
-            var newEnemy = Instantiate(possibleEnemies[Random.Range(0, possibleEnemies.Count)], enemyParent);
+            var multipleEnemies = Random.Range(1, 7);
+
+            if (multipleEnemies > 5)
+            {
+                multipleEnemies = 2;
+                
+                Instantiate(possibleEnemies[Random.Range(0, possibleEnemies.Count)], enemyParent);
+                Instantiate(possibleEnemies[Random.Range(0, possibleEnemies.Count)], enemy2Parent);
+                
+            }
+            else
+            {
+                var newEnemy = Instantiate(possibleEnemies[Random.Range(0, possibleEnemies.Count)], enemyParent);
+            }
+
         }
 
         
@@ -93,10 +123,19 @@ public class GameManager : MonoBehaviour
 
         foreach (var enemy in enemies)
         {
+            if (statManager.floorNumber > 1)
+            {
+                //enemy.currentEnemy.UpdateHealthUI(enemy.currentEnemy.maxHealth + 20);
+            }
             enemy.DisplayIntent();
         }
 
 
+
+
+        turnText.text = "Battle Begins!";
+        animator.Play("announce");
+        
 
         drawPileText.text = drawPile.Count.ToString();
         discardPileText.text = discardPile.Count.ToString();
@@ -106,12 +145,28 @@ public class GameManager : MonoBehaviour
         discardPile.AddRange(deck);
         ShuffleCards();
         DrawCards(drawAmount);
+
+        if (statManager.PlayerHasRelic("Steel Tempest"))
+        {
+            var parry = statManager.playerDeck.Where(c => c.cardName == "Parry").FirstOrDefault();
+            DisplayHand(parry);
+        }
+
+        //StartCoroutine(DisplayParryValue(3f));
     }
 
     private void Start()
     {
        
 
+    }
+
+    private IEnumerator DisplayParryValue(float time)
+    {
+        parryValueText.text = "Curremt parry value: " + player.parryValue;
+        parryValueText.gameObject.SetActive(true);
+        yield return new WaitForSeconds(time);
+        parryValueText.gameObject.SetActive(false);
     }
 
     private void ShuffleCards()
@@ -142,22 +197,11 @@ public class GameManager : MonoBehaviour
 
     public void DisplayHand(Card card)
     {
+        
         CardUI cardUi = handGameObjects[hand.Count - 1];
         cardUi.Populate(card);
         cardUi.gameObject.SetActive(true);
-    }
-
-    public void EndTurn()
-    {
-        discardPile.AddRange(hand);
-
-        foreach (var cardUi in handGameObjects)
-        {
-            cardUi.gameObject.SetActive(false);
-            hand.Remove(cardUi.card);
-        }
         
-        discardPileText.text = discardPile.Count.ToString();
     }
 
     public void ChangeTurn()
@@ -167,6 +211,8 @@ public class GameManager : MonoBehaviour
             turn = Turn.enemy;
             endTurnButton.interactable = false;
 
+            turnText.text = "Enemy's Turn";
+            animator.Play("announce");
 
             foreach (Card card in hand)
             {
@@ -188,6 +234,8 @@ public class GameManager : MonoBehaviour
                     enemy.currentEnemy = enemy.GetComponent<Fighter>();
                 }
 
+                enemy.currentEnemy.EvaluateEffectsAtTurnEnd();
+
                 //reset defence
                 enemy.currentEnemy.isDefending = false;
             }
@@ -198,6 +246,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
+
             foreach (Enemy enemy in enemies)
             {
                 enemy.DisplayIntent();
@@ -205,10 +254,19 @@ public class GameManager : MonoBehaviour
 
             turn = Turn.player;
 
+            player.parryValue -= tempParryValue;
+
             haste = maxHaste;
             hasteText.text = haste.ToString();
 
             endTurnButton.interactable = true;
+
+            if (player.parry.effectValue > 0)
+            {
+                player.parry.effectValue = 0;
+                Destroy(player.parry.effectDisplay.gameObject);
+            }
+
             player.isDefending = false;
             DrawCards(drawAmount);
 
@@ -218,18 +276,20 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator HandleEnemyTurn()
     {
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(0.4f);
 
-        foreach (Enemy enemy in enemies)
+        foreach (Enemy enemy in enemies.ToList())
         {
-            enemy.midTurn = true;
-            enemy.TakeTurn();
-            while (enemy.midTurn)
-            {
-                yield return new WaitForEndOfFrame();
-            }
-                
+                enemy.midTurn = true;
+                enemy.TakeTurn();
+                while (enemy.midTurn)
+                {
+                    yield return new WaitForEndOfFrame();
+                }      
         }
+
+        turnText.text = "Player's Turn";
+        animator.Play("announce");
 
         Debug.Log("Turn over");
         ChangeTurn();
@@ -245,7 +305,38 @@ public class GameManager : MonoBehaviour
         Debug.Log("played card");
         cardUI.posSet = false;
 
+        if (cardUI.card.cardName == "Parry" && player.parry.effectValue > 0)
+        {
+            player.parryValue += player.parryValue;
+            tempParryValue += 5;
+        }
+
         cardAction.PerformAction(cardUI.card, cardTarget);
+
+        
+
+        foreach (var enemy in enemies)
+        {
+            if (enemy.bigBird && enemy.currentEnemy.lamp.effectDisplay != null)
+            {
+                if (cardUI.card.cardType == "Attack" && enemy.currentEnemy.lamp.effectValue > 1)
+                {
+                    enemy.currentEnemy.lamp.effectValue -= 1;
+                    enemy.currentEnemy.lamp.effectDisplay.DisplayEffect(enemy.currentEnemy.lamp);
+                }
+                else if (cardUI.card.cardType != "Attack")
+                {
+                    enemy.currentEnemy.lamp.effectValue += 1;
+                    enemy.currentEnemy.lamp.effectDisplay.DisplayEffect(enemy.currentEnemy.lamp);
+                }
+                else
+                {
+                    enemy.currentEnemy.AddEffect(Effect.Type.strength, 10);
+                    enemy.DisplayIntent();
+                    Destroy(enemy.currentEnemy.lamp.effectDisplay.gameObject);
+                }
+            }
+        }
 
         haste -= 1;
         hasteText.text = haste.ToString();
@@ -301,6 +392,15 @@ public class GameManager : MonoBehaviour
 
             
             
+        }
+
+
+        else
+        {
+            gameOver.gameObject.SetActive(true);
+            gameOver.HandleGameOver(statManager.floorNumber);
+            gameOver.DisplayRelics();
+
         }
     }
 

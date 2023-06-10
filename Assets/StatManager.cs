@@ -8,6 +8,7 @@ using UnityEngine.SceneManagement;
 
 public class StatManager : MonoBehaviour
 {
+    public Character character;
 	public List<Card> playerDeck = new List<Card>();
 	public List<Card> cardLibrary = new List<Card>();
 	public List<Relic> relics = new List<Relic>();
@@ -18,7 +19,7 @@ public class StatManager : MonoBehaviour
     public int playerMaxHealth;
     public int defaultHealth = 100;
     public int defaultMaxHealth = 100;
-	private PlayerStatsUI playerStatsUI;
+	public PlayerStatsUI playerStatsUI;
     private GameManager gameManager;
 
 
@@ -27,7 +28,7 @@ public class StatManager : MonoBehaviour
         //PlayerPrefs.DeleteAll();
 
 
-        playerStatsUI = FindObjectOfType<PlayerStatsUI>();
+        
         gameManager = FindObjectOfType<GameManager>();
 
         if (SceneManager.GetActiveScene().name == "Battle Scene")
@@ -36,6 +37,7 @@ public class StatManager : MonoBehaviour
             {
                 var statsJson = PlayerPrefs.GetString("Stats");
                 var stats = JsonUtility.FromJson<PlayerStats>(statsJson);
+                character = stats.character;
                 goldAmount = stats.goldAmount;
                 playerDeck = stats.playerDeck;
                 cardLibrary = stats.cardLibrary;
@@ -48,11 +50,14 @@ public class StatManager : MonoBehaviour
                 gameManager.player.maxHealth = playerMaxHealth;
                 gameManager.player.UpdateHealthUI(playerCurrentHealth);
                 gameManager.DisplayHealth(playerCurrentHealth, gameManager.player.maxHealth);
+                playerStatsUI.DisplayRelics();
             }
 
             else
             {
-                gameManager.DisplayHealth(gameManager.player.currentHealth, gameManager.player.maxHealth);
+
+                ResetSavedValues();
+                playerStatsUI.DisplayRelics();
             }
         }
 
@@ -62,6 +67,7 @@ public class StatManager : MonoBehaviour
             {
                 var statsJson = PlayerPrefs.GetString("Stats");
                 var stats = JsonUtility.FromJson<PlayerStats>(statsJson);
+                character = stats.character;
                 goldAmount = stats.goldAmount;
                 playerDeck = stats.playerDeck;
                 cardLibrary = stats.cardLibrary;
@@ -71,26 +77,45 @@ public class StatManager : MonoBehaviour
                 playerMaxHealth = stats.playerMaxHealth;
 
                 UpdateHealthValue(playerCurrentHealth, playerMaxHealth);
+                playerStatsUI.DisplayRelics();
             }
 
             else
             {
-                playerCurrentHealth = defaultHealth;
-                playerMaxHealth = defaultMaxHealth;
-                UpdateHealthValue(defaultHealth, defaultMaxHealth);
+                
+                ResetSavedValues();
+                playerStatsUI.DisplayRelics();
             }
         }
-        
-        
     }
 
-    private void Start()
+    public void ResetSavedValues()
     {
+        playerCurrentHealth = defaultHealth;
+        playerMaxHealth = defaultMaxHealth;
+        
+        goldAmount = 100;
+        UpdateHealthValue(defaultHealth, defaultMaxHealth);
+    }
 
+    public bool PlayerHasRelic(string relicName)
+    {
+        foreach (Relic r in relics)
+        {
+            if (r.relicName == relicName)
+                return true;
+        }
+        return false;
     }
 
     public void UpdateHealthValue(int hp, int maxHp)
     {
+        if (playerStatsUI.isActiveAndEnabled == false)
+        {
+            playerStatsUI.gameObject.SetActive(true);
+            
+            playerStatsUI.healthDisplayText.text = $"{hp} / {maxHp}";
+        }
         playerStatsUI.healthDisplayText.text = $"{hp} / {maxHp}";
     }
     public void UpdateGoldValue(int newGold)
@@ -102,6 +127,8 @@ public class StatManager : MonoBehaviour
     public void GameOver()
     {
 
+        PlayerPrefs.DeleteAll();
+        SceneManager.LoadScene("Main Scene");
     }    
 
 
@@ -123,7 +150,7 @@ public class StatManager : MonoBehaviour
     {
         if (SceneManager.GetActiveScene().name == "Battle Scene")
         {
-            var stats = new PlayerStats(playerDeck, cardLibrary, relics, relicLibrary, floorNumber, goldAmount, gameManager.player.currentHealth, gameManager.player.maxHealth);
+            var stats = new PlayerStats(character, playerDeck, cardLibrary, relics, relicLibrary, floorNumber, goldAmount, gameManager.player.currentHealth, gameManager.player.maxHealth);
             var json = JsonUtility.ToJson(stats);
 
             PlayerPrefs.SetString("Stats", json);
@@ -133,7 +160,7 @@ public class StatManager : MonoBehaviour
         
         else
         {
-            var stats = new PlayerStats(playerDeck, cardLibrary, relics, relicLibrary, floorNumber, goldAmount, playerCurrentHealth, playerMaxHealth);
+            var stats = new PlayerStats(character, playerDeck, cardLibrary, relics, relicLibrary, floorNumber, goldAmount, playerCurrentHealth, playerMaxHealth);
             var json = JsonUtility.ToJson(stats);
 
             PlayerPrefs.SetString("Stats", json);

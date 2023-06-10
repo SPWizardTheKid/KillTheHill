@@ -9,6 +9,7 @@ public class PlayerStatsUI : MonoBehaviour
 {
     public TMP_Text healthDisplayText;
     public TMP_Text goldAmountText;
+    public TMP_Text heroName;
     public Transform relicParent;
     public GameObject relicPrefab;
     public Button showDeckButton;
@@ -23,12 +24,18 @@ public class PlayerStatsUI : MonoBehaviour
     private void Start()
     {
         DisplayRelics();
+        if (statManager.character != null) heroName.text = "The " + statManager.character.name;
         goldAmountText.text = statManager.goldAmount.ToString();
+        healthDisplayText.text = $"{statManager.playerCurrentHealth} / {statManager.playerMaxHealth}";
 
     }
 
     public void DisplayRelics()
     {
+        if (statManager == null) statManager = FindObjectOfType<StatManager>();
+
+        if (statManager.relics.Count == 0) return;
+
         foreach (Transform c in relicParent)
             Destroy(c.gameObject);
 

@@ -6,7 +6,7 @@ using UnityEngine;
 public class EnemyAction
 {
     public IntentType intentType;
-    public enum IntentType { Attack, Defend, SelfBuff, Debuff, AttackDebuff }
+    public enum IntentType { Attack, Defend, SelfBuff, Debuff, AttackDebuff, Summon }
     public int amount;
     public int quantity;
     public int debuffAmount;

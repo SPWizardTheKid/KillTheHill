@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a6ea4836ef2b2841a42f00749998dc9, type: 3}
+  m_Name: Unholy Strike
+  m_EditorClassIdentifier: 
+  cardName: Unholy Strike
+  cardDescription: Deals 15 damage, applies 1 Weak and 1 Vulnerability
+  cardSprite: {fileID: 21300000, guid: 874a9d06f85e4904384cd459ff8a6f50, type: 3}
+  cardType: Attack
+  amount: 15
+  effectAmount: 1
+  rarity: {r: 1, g: 0.61413956, b: 0.14509803, a: 1}

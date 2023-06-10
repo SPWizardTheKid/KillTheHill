@@ -6,6 +6,7 @@ using UnityEngine;
 
 public class PlayerStats
 {
+    public Character character;
 	public List<Card> playerDeck = new List<Card>();
 	public List<Card> cardLibrary = new List<Card>();
 	public List<Relic> relics = new List<Relic>();
@@ -15,8 +16,9 @@ public class PlayerStats
 	public int playerCurrentHealth;
     public int playerMaxHealth;
 
-    public PlayerStats(List<Card> deck, List<Card> library, List<Relic> relicsList, List<Relic> rLibrary, int floor, int gold, int currentHealth, int maxHealth)
+    public PlayerStats(Character hero, List<Card> deck, List<Card> library, List<Relic> relicsList, List<Relic> rLibrary, int floor, int gold, int currentHealth, int maxHealth)
     {
+        character = hero;
         playerDeck = deck;
         cardLibrary = library;
         relics = relicsList;

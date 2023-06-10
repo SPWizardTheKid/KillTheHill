@@ -12,5 +12,6 @@ public class FighterHealthBar : MonoBehaviour
     {
         healthText.text = $"{healthAmount}/{healthSlider.maxValue}";
         healthSlider.value = healthAmount;
+
     }
 }

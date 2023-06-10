@@ -20,12 +20,16 @@ public class CardUI : MonoBehaviour
     private GraphicRaycaster tempRaycaster;
 
     private Vector3 initialPos;
-    private bool startTimer;
+    private bool locked;
     public bool posSet = false;
     public bool interactable = false;
 
+    private Canvas myCanvas;
+    private CardUI cardUI;
+
     private void Awake()
     {
+        myCanvas = FindObjectOfType<Canvas>();
         gameManager = FindObjectOfType<GameManager>();
      
     }
@@ -33,7 +37,8 @@ public class CardUI : MonoBehaviour
     public void Populate(Card _card)
     {
         card = _card;
-        gameObject.GetComponent<RectTransform>().localScale = new Vector3(1, 1, 1);
+        cardUI = this;
+        //gameObject.GetComponent<RectTransform>().localScale = new Vector3(1, 1, 1);
         cardName.text = card.cardName;
         cardDescription.text = card.cardDescription;
         cartType.text = card.cardType;
@@ -45,26 +50,33 @@ public class CardUI : MonoBehaviour
         }
     }
 
+    private IEnumerator DisplayParryValue(float time)
+    {
+        gameManager.parryValueText.text = "Curremt parry value: " + gameManager.player.parryValue;
+        gameManager.parryValueText.gameObject.SetActive(true);
+        yield return new WaitForSeconds(time);
+        gameManager.parryValueText.gameObject.SetActive(false);
+    }
+
     public void PointerEnter()
     {
-        transform.localScale = new Vector2(1.3f, 1.3f);
 
-        if (SceneManager.GetActiveScene().name == "Main Scene") return;
-        tempCanvas = gameObject.AddComponent<Canvas>();
-        tempCanvas.overrideSorting = true;
-        tempCanvas.sortingOrder = 1;
-        tempRaycaster = gameObject.AddComponent<GraphicRaycaster>();
+        
+        transform.localScale = new Vector2(1.3f, 1.3f);
 
         
     }
 
     public void PointerExit()
     {
-        transform.localScale = new Vector2(1f, 1f);
-        if (SceneManager.GetActiveScene().name == "Main Scene") return;
-        Destroy(tempRaycaster);
-        Destroy(tempCanvas);
+        if (tempCanvas != null)
+        {
+            Destroy(cardUI.tempRaycaster);
+            Destroy(cardUI.tempCanvas);
+        }
+
         
+        transform.localScale = new Vector2(1f, 1f);   
     }
 
     public void PointerDown()
@@ -86,6 +98,20 @@ public class CardUI : MonoBehaviour
 
         else
         {
+            if (tempCanvas == null)
+            {
+                tempCanvas = cardUI.gameObject.AddComponent<Canvas>();
+                tempCanvas.overrideSorting = true;
+                tempCanvas.sortingOrder = 1;
+                tempRaycaster = cardUI.gameObject.AddComponent<GraphicRaycaster>();
+            }
+            else
+            {
+                Destroy(tempRaycaster);
+                Destroy(tempCanvas);
+            }
+            
+            
 
             if (!posSet) initialPos = transform.position;
             posSet = true;
@@ -104,6 +130,9 @@ public class CardUI : MonoBehaviour
 
         transform.localScale = new Vector2(1.3f, 1.3f);
 
+        //Vector2 pos;
+        //RectTransformUtility.ScreenPointToLocalPointInRectangle(myCanvas.transform as RectTransform, Input.mousePosition, myCanvas.worldCamera, out pos);
+        //transform.position = myCanvas.transform.TransformPoint(pos);
         transform.position = Input.mousePosition;
     }
 
@@ -111,8 +140,8 @@ public class CardUI : MonoBehaviour
     {
         if (SceneManager.GetActiveScene().name == "Main Scene") return;
 
-        Destroy(tempRaycaster);
-        Destroy(tempCanvas);
+        Destroy(cardUI.tempRaycaster);
+        Destroy(cardUI.tempCanvas);
 
         transform.localScale = new Vector2(1f, 1f);
         StartCoroutine(MoveFunction());

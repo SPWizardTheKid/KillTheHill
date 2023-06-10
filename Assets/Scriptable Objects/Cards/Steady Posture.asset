@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a6ea4836ef2b2841a42f00749998dc9, type: 3}
+  m_Name: Steady Posture
+  m_EditorClassIdentifier: 
+  cardName: Steady Posture
+  cardDescription: Your Parries can deflect 5 more damage this combat.
+  cardSprite: {fileID: 0}
+  cardType: Skill
+  amount: 5
+  effectAmount: 0
+  rarity: {r: 0.29411766, g: 0.8784314, b: 0.8784314, a: 1}

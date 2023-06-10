@@ -40,7 +40,7 @@ public class Mystery : MonoBehaviour
 
     public void ReturnToMap()
     {
-        this.gameObject.SetActive(false);
+        Destroy(gameObject);
     }
 
     public void Fountain(int optionIndex)

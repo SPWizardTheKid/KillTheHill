@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Fighter : MonoBehaviour
 {
@@ -10,15 +12,29 @@ public class Fighter : MonoBehaviour
     private Enemy enemy;
     private GameManager gameManager;
     public FighterHealthBar fighterHealthBar;
+    public GameObject damageIndicator;
+
+    public int parryValue;
+
+    public Sprite strengthSprite;
+    public Sprite vulnerableSprite;
+    public Sprite weakSprite;
+    public Sprite parrySprite; 
 
     [Header("Effects")]
     public Effect strength;
     public Effect vulnerable;
     public Effect weak;
     public Effect parry;
+    public Effect vanish;
+    public Effect summon;
+    public Effect poison;
+    public Effect punishment;
+    public Effect lamp;
 
     public GameObject effectPrefab;
     public Transform effectParent;
+
 
     public bool isDefending;
     public bool isPlayer;
@@ -31,6 +47,15 @@ public class Fighter : MonoBehaviour
         currentHealth = maxHealth;
         fighterHealthBar.healthSlider.maxValue = maxHealth;
         fighterHealthBar.DisplayHealth(currentHealth);
+
+        parryValue = 5;
+
+        strength.effectIcon = strengthSprite;
+        vulnerable.effectIcon = vulnerableSprite;
+        weak.effectIcon = weakSprite;
+        parry.effectIcon = parrySprite;
+
+
         if (isPlayer)
             gameManager.DisplayHealth(currentHealth, currentHealth);
     }
@@ -41,18 +66,40 @@ public class Fighter : MonoBehaviour
 
         Debug.Log($"dealt {value} damage");
 
+        var indicator = Instantiate(damageIndicator, this.transform.position, Quaternion.identity, this.transform).GetComponent<DamageIndicator>();
+        indicator.SetDamageText(value);
+
         currentHealth -= value;
         UpdateHealthUI(currentHealth);
 
         if (currentHealth <= 0)
         {
-            if (enemy != null) gameManager.EndFight(true);
+            //var leftSummons = gameManager.enemies.Where(s => s.isSummon).ToList();
 
-            else gameManager.EndFight(false);
+            foreach (var enemy in gameManager.enemies)
+            {
+                if (!enemy.isSummon)
+                {
+                    gameManager.EndFight(true);
+                    break;
+                }
+
+                else if (gameManager.enemies.Count == 0)
+                {
+                    gameManager.EndFight(true);
+                }
 
 
-            Destroy(gameObject);
+            }
+
+            if (isPlayer) gameManager.EndFight(false);
+
         }
+                
+
+         Destroy(gameObject);
+         gameManager.enemies.Remove(enemy);
+
     }
 
     public void AddEffect(Effect.Type type, int value)
@@ -66,7 +113,8 @@ public class Fighter : MonoBehaviour
             vulnerable.effectValue += value;
             vulnerable.effectDisplay.DisplayEffect(vulnerable);
         }
-        else if (type == Effect.Type.weak)
+
+        if (type == Effect.Type.weak)
         {
             if (weak.effectValue <= 0)
             {
@@ -75,7 +123,8 @@ public class Fighter : MonoBehaviour
             weak.effectValue += value;
             weak.effectDisplay.DisplayEffect(weak);
         }
-        else if (type == Effect.Type.strength)
+
+        if (type == Effect.Type.strength)
         {
             if (strength.effectValue <= 0)
             {
@@ -84,6 +133,62 @@ public class Fighter : MonoBehaviour
             }
             strength.effectValue += value;
             strength.effectDisplay.DisplayEffect(strength);
+        }
+
+        if (type == Effect.Type.parry)
+        {
+            if (parry.effectValue <= 0)
+            {
+                //create new buff object
+                parry.effectDisplay = Instantiate(effectPrefab, effectParent).GetComponent<EffectUI>();
+            }
+            parry.effectValue = parryValue;
+            parry.effectDisplay.DisplayEffect(parry);
+        }
+
+        if (type == Effect.Type.vanish)
+        {
+            if (vanish.effectValue <= 0)
+            {
+                //create new buff object
+                vanish.effectDisplay = Instantiate(effectPrefab, effectParent).GetComponent<EffectUI>();
+            }
+            vanish.effectValue += value;
+            vanish.effectDisplay.DisplayEffect(vanish);
+        }
+
+        if (type == Effect.Type.poison)
+        {
+            if (poison.effectValue <= 0)
+            {
+                //create new buff object
+                poison.effectDisplay = Instantiate(effectPrefab, effectParent).GetComponent<EffectUI>();
+            }
+            poison.effectValue += value;
+            poison.effectDisplay.DisplayEffect(poison);
+        }
+
+        if (type == Effect.Type.summon)
+        {
+            summon.effectDisplay = Instantiate(effectPrefab, effectParent).GetComponent<EffectUI>();
+            summon.effectDisplay.DisplayEffect(summon);
+            summon.effectDisplay.effectText.gameObject.SetActive(false);
+        }
+
+        if (type == Effect.Type.punishment)
+        {
+            punishment.effectDisplay = Instantiate(effectPrefab, effectParent).GetComponent<EffectUI>();
+            punishment.effectValue += value;
+            punishment.effectDisplay.DisplayEffect(punishment);
+            punishment.effectDisplay.effectText.gameObject.SetActive(false);
+        }
+
+        if (type == Effect.Type.lamp)
+        {
+            lamp.effectDisplay = Instantiate(effectPrefab, effectParent).GetComponent<EffectUI>();
+            lamp.effectValue += 3;
+            lamp.effectDisplay.DisplayEffect(lamp);
+            
         }
     }
 
@@ -97,7 +202,7 @@ public class Fighter : MonoBehaviour
             if (vulnerable.effectValue <= 0)
                 Destroy(vulnerable.effectDisplay.gameObject);
         }
-        else if (weak.effectValue > 0)
+        if (weak.effectValue > 0)
         {
             weak.effectValue -= 1;
             weak.effectDisplay.DisplayEffect(weak);
@@ -105,6 +210,41 @@ public class Fighter : MonoBehaviour
             if (weak.effectValue <= 0)
                 Destroy(weak.effectDisplay.gameObject);
         }
+
+        if (vanish.effectValue > 0)
+        {
+            vanish.effectValue -= 1;
+            vanish.effectDisplay.DisplayEffect(vanish);
+
+            if (vanish.effectValue <= 0)
+                Destroy(vanish.effectDisplay.gameObject);
+        }
+
+        if (poison.effectValue > 0)
+        {
+            TakeDamage(poison.effectValue);
+            poison.effectValue -= 1;
+            poison.effectDisplay.DisplayEffect(poison);
+
+            if (poison.effectValue <= 0)
+                Destroy(poison.effectDisplay.gameObject);
+
+        }
+
+        if (lamp.effectValue > 0)
+        {
+            lamp.effectValue -= 1;
+            lamp.effectDisplay.DisplayEffect(lamp);
+
+            if (lamp.effectValue <= 0 && lamp.effectDisplay != null)
+            {
+                AddEffect(Effect.Type.strength, 10);
+                Destroy(lamp.effectDisplay.gameObject);
+            }
+
+        }
+
+
     }
 
     public void ResetBuffs()
@@ -124,6 +264,7 @@ public class Fighter : MonoBehaviour
             strength.effectValue = 0;
             Destroy(strength.effectDisplay.gameObject);
         }
+
 
         isDefending = false;
     }

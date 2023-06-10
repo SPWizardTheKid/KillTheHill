@@ -13,6 +13,7 @@ namespace Map
         public MapManager mapManager;
         public MapView view;
         private static MainSceneManager manager;
+        private static StatManager statManager;
 
         public static MapPlayerTracker Instance;
 
@@ -21,6 +22,7 @@ namespace Map
         private void Awake()
         {
             manager = FindObjectOfType<MainSceneManager>();
+            statManager = manager.GetComponent<StatManager>();
             Instance = this;
         }
 
@@ -74,22 +76,28 @@ namespace Map
             switch (mapNode.Node.nodeType)
             {
                 case NodeType.MinorEnemy:
-                    //SceneManager.LoadScene("Battle Scene");
-                    
+                    statManager.LoadBattleScene();
+                    Instance.Locked = false;
                     break;
                 case NodeType.EliteEnemy:
                     break;
                 case NodeType.RestSite:
+                    manager.LoadRestSite();
+                    Instance.Locked = false;
                     break;
                 case NodeType.Treasure:
                     manager.LoadChestScene();
+                    Instance.Locked = false;
                     break;
                 case NodeType.Store:
+                    manager.LoadShopScene();
+                    Instance.Locked = false;
                     break;
                 case NodeType.Boss:
                     break;
                 case NodeType.Mystery:
                     manager.LoadRandomMystery();
+                    Instance.Locked = false;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
