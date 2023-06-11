@@ -60,7 +60,7 @@ public class CardUI : MonoBehaviour
 
     public void PointerEnter()
     {
-
+        
         
         transform.localScale = new Vector2(1.3f, 1.3f);
 
@@ -69,6 +69,7 @@ public class CardUI : MonoBehaviour
 
     public void PointerExit()
     {
+        
         if (tempCanvas != null)
         {
             Destroy(cardUI.tempRaycaster);

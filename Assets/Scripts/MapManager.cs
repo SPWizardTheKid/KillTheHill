@@ -8,13 +8,13 @@ namespace Map
     {
         public MapConfig config;
         public MapView view;
-        public string bossName;
+        public StatManager statManager;
 
-        public Map CurrentMap { get; private set; }
+        public Map CurrentMap { get;  set; }
 
         private void Start()
         {
-            
+
             if (PlayerPrefs.HasKey("Map"))
             {
                 var mapJson = PlayerPrefs.GetString("Map");
@@ -24,7 +24,9 @@ namespace Map
                 {
                     // payer has already reached the boss, generate a new map
                     GenerateNewMap();
+                    
                 }
+                
                 else
                 {
                     CurrentMap = map;
@@ -35,6 +37,7 @@ namespace Map
             }
             else
             {
+                if (statManager.floorNumber == 2) GenerateNewMap();
                 //GenerateNewMap();
             }
         }

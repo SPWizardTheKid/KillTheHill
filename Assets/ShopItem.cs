@@ -15,6 +15,9 @@ public class ShopItem : MonoBehaviour
     public TMP_Text priceText;
     public Transform rarityBorder;
 
+    public AudioClip buySound;
+    public AudioClip hover;
+
     public int price;
     public int itemIndex;
 
@@ -69,6 +72,8 @@ public class ShopItem : MonoBehaviour
 
         statManager.UpdateGoldValue(-price);
 
+        Audio.instance.Play(buySound);
+
         if (isCard) 
         {
             statManager.playerDeck.Add(statManager.cardLibrary[itemIndex]);
@@ -87,6 +92,7 @@ public class ShopItem : MonoBehaviour
 
     public void PointerEnter()
     {
+        Audio.instance.Play(hover);
         transform.localScale = new Vector2(1.1f, 1.1f);
     }
 

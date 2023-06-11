@@ -76,24 +76,37 @@ namespace Map
             switch (mapNode.Node.nodeType)
             {
                 case NodeType.MinorEnemy:
+                    Audio.instance.Play(manager.mapBattle);
                     statManager.LoadBattleScene();
                     Instance.Locked = false;
                     break;
                 case NodeType.EliteEnemy:
+                    Audio.instance.Play(manager.mapBattle);
+                    PlayerPrefs.SetString("Elite", "Elite");
+                    PlayerPrefs.Save();
+                    statManager.LoadBattleScene();
+                    Instance.Locked = false;
                     break;
                 case NodeType.RestSite:
                     manager.LoadRestSite();
                     Instance.Locked = false;
                     break;
                 case NodeType.Treasure:
+                    Audio.instance.Play(manager.mapMystery);
                     manager.LoadChestScene();
                     Instance.Locked = false;
                     break;
                 case NodeType.Store:
+                    Audio.instance.Play(manager.mapMystery);
                     manager.LoadShopScene();
                     Instance.Locked = false;
                     break;
                 case NodeType.Boss:
+                    Audio.instance.Play(manager.mapBattle);
+                    PlayerPrefs.SetString("Boss", manager.bossName);
+                    PlayerPrefs.Save();
+                    statManager.LoadBattleScene();
+                    Instance.Locked = false;
                     break;
                 case NodeType.Mystery:
                     manager.LoadRandomMystery();

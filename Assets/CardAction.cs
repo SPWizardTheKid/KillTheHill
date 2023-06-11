@@ -49,6 +49,22 @@ public class CardAction : MonoBehaviour
             case "Steady Posture":
                 SteadyPosture();
                 break;
+            case "Deadly Needles":
+                DeadlyNeedles();
+                break;
+            case "Sudden Training":
+                SuddenTraining();
+                break;
+            case "Wide Swing":
+                WideSwing();
+                break;
+            case "Scorching Blade":
+                AttackEnemy();
+                ScorchingBlade();
+                break;
+            case "Counter Play":
+                CounterPlay();
+                break;
 
             default:
                 break;
@@ -106,9 +122,43 @@ public class CardAction : MonoBehaviour
         }
     }
 
+    private void DeadlyNeedles()
+    {
+        foreach (var enemy in gameManager.enemies)
+        {
+            enemy.currentEnemy.TakeDamage(card.amount);
+            enemy.currentEnemy.AddEffect(Effect.Type.poison, card.amount);
+        }
+    }
+    
+    private void ScorchingBlade()
+    {
+        player.AddEffect(Effect.Type.burn, card.effectAmount);
+    }
+    
+    private void WideSwing()
+    {
+        foreach (var enemy in gameManager.enemies)
+        {
+            enemy.currentEnemy.TakeDamage(card.amount);
+        }
+    }
+
+    private void SuddenTraining()
+    {
+        player.AddEffect(Effect.Type.strength, 2);
+    }
+
+    private void CounterPlay()
+    {
+        player.AddEffect(Effect.Type.counterPlay, 1);
+    }
+
     private void SteadyPosture()
     {
+        if (gameManager.tempParryValue > 0) player.parryValue -= gameManager.tempParryValue + 5;
         player.parryValue += card.amount;
+        
     }
 
     private void ApplyEffect(Effect.Type t)

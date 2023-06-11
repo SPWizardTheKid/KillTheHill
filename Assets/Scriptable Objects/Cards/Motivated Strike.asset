@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Motivated Strike
   m_EditorClassIdentifier: 
   cardName: Motivated Strike
-  cardDescription: 'Deals 10 damage.
+  cardDescription: 'Deal 10 damage.
 
-    Gain 1 Strength'
+    Gain 1 Strength.'
   cardSprite: {fileID: 21300000, guid: 831657f21e82bb44abacc2bd4a489e73, type: 3}
   cardType: Attack
   amount: 10

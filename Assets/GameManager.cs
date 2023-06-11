@@ -10,9 +10,10 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
+    public bool boss;
     public bool elite;
 
-    public List<Card> deck;
+    public List<Card> deck = new List<Card>();
     public List<Card> drawPile = new List<Card>();
     public List<Card> hand = new List<Card>();
     public List<CardUI> handGameObjects = new List<CardUI>();
@@ -21,6 +22,17 @@ public class GameManager : MonoBehaviour
     public List<GameObject> possibleEnemies;
     public List<GameObject> possibleElites;
     public List<GameObject> specialEncounters;
+    public List<GameObject> bosses;
+
+    [Header("Audio")]
+    public AudioClip battleStart;
+    public AudioClip battleTheme;
+    public AudioClip parrySound;
+    public AudioClip attackSound;
+    public AudioClip swingSound;
+    public AudioClip winSound;
+    public AudioClip deathSound;
+    public AudioClip finalTheme;
 
     public TMP_Text drawPileText;
     public TMP_Text discardPileText;
@@ -41,6 +53,7 @@ public class GameManager : MonoBehaviour
     public Transform handTransform;
     public Transform enemyParent;
     public Transform enemy2Parent;
+    public Transform enemy3Parent;
     public Transform summonParent;
     public EndScreen endScreen;
 
@@ -52,7 +65,7 @@ public class GameManager : MonoBehaviour
     private StatManager statManager;
     private PlayerStatsUI playerStatsUI;
 
-    private int tempParryValue;
+    public int tempParryValue;
 
     public Turn turn;
     public enum Turn {player, enemy};
@@ -63,6 +76,8 @@ public class GameManager : MonoBehaviour
         cardAction = GetComponent<CardAction>();
         statManager = FindObjectOfType<StatManager>();
         playerStatsUI = FindObjectOfType<PlayerStatsUI>();
+
+        
 
         foreach (var cardUi in handGameObjects)
         {
@@ -75,13 +90,38 @@ public class GameManager : MonoBehaviour
 
             if (specialEnemy == "Vergil")
             {
-                var enemy = Instantiate(specialEncounters[0], enemyParent);
+                var enemy = Instantiate(specialEncounters[0], enemy2Parent);
             }
         }
 
-        else if (elite)
+        else if (PlayerPrefs.HasKey("Boss"))
         {
-            var elite = Instantiate(possibleElites[Random.Range(0, possibleElites.Count)], enemyParent);
+            var bossName = PlayerPrefs.GetString("Boss");
+            if (bossName == "Golem King")
+            {
+                var boss = Instantiate(bosses[0], enemy2Parent);
+            }
+
+            if (bossName == "Lord of Shades")
+            {
+                var boss = Instantiate(bosses[1], enemy2Parent);
+            }
+
+            if (bossName == "Gabriel")
+            {
+                var boss = Instantiate(bosses[2], enemy2Parent);
+            }
+            
+        }
+
+        else if (statManager.floorNumber == 3)
+        {
+            var boss = Instantiate(bosses[3], enemy2Parent);
+        }
+
+        else if (PlayerPrefs.HasKey("Elite"))
+        {
+            var elite = Instantiate(possibleElites[Random.Range(0, possibleElites.Count)], enemy2Parent);
         }
 
         else
@@ -98,7 +138,7 @@ public class GameManager : MonoBehaviour
             }
             else
             {
-                var newEnemy = Instantiate(possibleEnemies[Random.Range(0, possibleEnemies.Count)], enemyParent);
+                var newEnemy = Instantiate(possibleEnemies[Random.Range(0, possibleEnemies.Count)], enemy2Parent);
             }
 
         }
@@ -127,10 +167,29 @@ public class GameManager : MonoBehaviour
             {
                 //enemy.currentEnemy.UpdateHealthUI(enemy.currentEnemy.maxHealth + 20);
             }
+            enemy.LoadEnemy();
             enemy.DisplayIntent();
         }
 
+        if (statManager.PlayerHasRelic("Steel Tempest"))
+        {
+            var parry = statManager.cardLibrary.Where(c => c.cardName == "Parry").FirstOrDefault();
+            deck.Add(parry);
+        }
 
+        if (statManager.PlayerHasRelic("Murasama"))
+        {
+            maxHaste += 1;
+        }
+
+        if (statManager.PlayerHasRelic("Yamato"))
+        {
+            foreach (var enemy in enemies)
+            {
+                enemy.currentEnemy.AddEffect(Effect.Type.vulnerable, 2);
+                enemy.currentEnemy.AddEffect(Effect.Type.weak, 2);
+            }
+        }
 
 
         turnText.text = "Battle Begins!";
@@ -146,28 +205,43 @@ public class GameManager : MonoBehaviour
         ShuffleCards();
         DrawCards(drawAmount);
 
-        if (statManager.PlayerHasRelic("Steel Tempest"))
-        {
-            var parry = statManager.playerDeck.Where(c => c.cardName == "Parry").FirstOrDefault();
-            DisplayHand(parry);
-        }
+        
 
         //StartCoroutine(DisplayParryValue(3f));
     }
 
     private void Start()
     {
-       
+        //StartCoroutine(PlayDelayedSound());
+
+        if (statManager.floorNumber < 3)
+        {
+
+            StartCoroutine(PlayDelayedSound());
+        }
+        else
+        {
+            StartCoroutine(PlayDelayedFinalTheme());
+        }
 
     }
 
-    private IEnumerator DisplayParryValue(float time)
+    private IEnumerator PlayDelayedSound()
     {
-        parryValueText.text = "Curremt parry value: " + player.parryValue;
-        parryValueText.gameObject.SetActive(true);
-        yield return new WaitForSeconds(time);
-        parryValueText.gameObject.SetActive(false);
+        //battleStart.
+        Audio.instance.Play(battleStart);
+        yield return new WaitForSeconds(battleStart.length);
+        Audio.instance.Play(battleTheme, true);
+        
     }
+
+    private IEnumerator PlayDelayedFinalTheme()
+    {
+        Audio.instance.Play(battleStart);
+        yield return new WaitForSeconds(battleStart.length);
+        Audio.instance.Play(finalTheme, true);
+    }
+
 
     private void ShuffleCards()
     {
@@ -239,7 +313,7 @@ public class GameManager : MonoBehaviour
                 //reset defence
                 enemy.currentEnemy.isDefending = false;
             }
-
+            
             
             player.EvaluateEffectsAtTurnEnd();  
             StartCoroutine(HandleEnemyTurn());
@@ -254,18 +328,26 @@ public class GameManager : MonoBehaviour
 
             turn = Turn.player;
 
-            player.parryValue -= tempParryValue;
 
-            haste = maxHaste;
-            hasteText.text = haste.ToString();
+            if (player.parryValue >= 5)
+            {
+                player.parryValue -= tempParryValue;
+            }
 
-            endTurnButton.interactable = true;
+            tempParryValue = 0;
 
             if (player.parry.effectValue > 0)
             {
                 player.parry.effectValue = 0;
                 Destroy(player.parry.effectDisplay.gameObject);
             }
+
+            haste = maxHaste;
+            hasteText.text = haste.ToString();
+
+            endTurnButton.interactable = true;
+
+            
 
             player.isDefending = false;
             DrawCards(drawAmount);
@@ -280,6 +362,11 @@ public class GameManager : MonoBehaviour
 
         foreach (Enemy enemy in enemies.ToList())
         {
+            if (enemy.miceSummon)
+            {
+                enemy.miceSummon = false;
+                continue;
+            }
                 enemy.midTurn = true;
                 enemy.TakeTurn();
                 while (enemy.midTurn)
@@ -305,10 +392,30 @@ public class GameManager : MonoBehaviour
         Debug.Log("played card");
         cardUI.posSet = false;
 
+        if (cardUI.card.cardName == "Parry" && player.counterPlay.effectValue > 0)
+        {
+            player.AddEffect(Effect.Type.strength, 1);
+        }
+
         if (cardUI.card.cardName == "Parry" && player.parry.effectValue > 0)
         {
             player.parryValue += player.parryValue;
             tempParryValue += 5;
+        }
+
+        if (cardUI.card.cardType == "Attack")
+        {
+            Audio.instance.Play(attackSound);
+        }
+        else
+        {
+            Audio.instance.Play(swingSound);
+            if (statManager.PlayerHasRelic("Ancient Scroll"))
+            {
+                player.currentHealth += 1;
+                if (player.currentHealth > player.maxHealth) player.currentHealth = player.maxHealth;
+                player.UpdateHealthUI(player.currentHealth);
+            }
         }
 
         cardAction.PerformAction(cardUI.card, cardTarget);
@@ -355,7 +462,16 @@ public class GameManager : MonoBehaviour
         {
             endScreen.gameObject.SetActive(true);
             endScreen.goldReward.gameObject.SetActive(true);
-            
+
+            Audio.instance.Stop(battleTheme);
+            Audio.instance.Play(winSound);
+
+            if (statManager.PlayerHasRelic("Steel Tempest"))
+            {
+                var parry = deck.Where(c => c.cardName == "Parry").FirstOrDefault();
+                statManager.playerDeck.Remove(parry);
+            }
+
             if (PlayerPrefs.HasKey("Special"))
             {
                 var specialEnemy = PlayerPrefs.GetString("Special");
@@ -377,8 +493,68 @@ public class GameManager : MonoBehaviour
                     playerStatsUI.DisplayRelics();
 
                     PlayerPrefs.DeleteKey("Special");
-                    
+
+                    PlayerPrefs.SetString("Menu", "False");
+                    PlayerPrefs.Save();
                 }
+            }
+
+            else if (PlayerPrefs.HasKey("Elite"))
+            {
+                endScreen.relicReward.gameObject.SetActive(true);
+                var goldValue = Random.Range(50, 60);
+                if (statManager.relicLibrary.Count > 0)
+                {
+                    statManager.relicLibrary.Shuffle();
+                    endScreen.goldReward.rewardName.text = goldValue.ToString() + " Gold";
+                    var relicReward = statManager.relicLibrary.Where(r => r.relicName != "Yamato").FirstOrDefault();
+                    if (relicReward == null) return;
+                    endScreen.relicReward.gameObject.SetActive(true);
+                    endScreen.relicReward.DisplayRelic(relicReward);
+
+                    statManager.relics.Add(relicReward);
+                    statManager.relicLibrary.Remove(relicReward);
+                }
+                endScreen.cardReward.gameObject.SetActive(true);
+
+                playerStatsUI.DisplayRelics();
+
+                PlayerPrefs.DeleteKey("Elite");
+                PlayerPrefs.SetString("Menu", "False");
+                PlayerPrefs.Save();
+            }
+
+            else if (PlayerPrefs.HasKey("Boss"))
+            {
+                var goldValue = Random.Range(70, 99);
+                statManager.floorNumber += 1;
+                if (statManager.relicLibrary.Count > 0)
+                {
+                    statManager.relicLibrary.Shuffle();
+                    endScreen.goldReward.rewardName.text = goldValue.ToString() + " Gold";
+                    var relicReward = statManager.relicLibrary.Where(r => r.relicName != "Yamato").FirstOrDefault();
+                    if (relicReward == null) return;
+                    endScreen.relicReward.gameObject.SetActive(true);
+                    endScreen.relicReward.DisplayRelic(relicReward);
+
+                    statManager.relics.Add(relicReward);
+                    statManager.relicLibrary.Remove(relicReward);
+                }
+                endScreen.cardReward.gameObject.SetActive(false);
+                
+                statManager.UpdateGoldValue(goldValue);
+
+
+                playerStatsUI.DisplayRelics();
+
+                
+                statManager.playerCurrentHealth = statManager.playerMaxHealth;
+
+                PlayerPrefs.SetString("Menu", "False");
+                PlayerPrefs.Save();
+
+                PlayerPrefs.DeleteKey("Boss");
+
             }
 
             else
@@ -388,18 +564,25 @@ public class GameManager : MonoBehaviour
                 var goldValue = Random.Range(12, 45);
                 endScreen.goldReward.rewardName.text = goldValue.ToString() + " Gold";
                 statManager.UpdateGoldValue(goldValue);
+
+                PlayerPrefs.SetString("Menu", "False");
+                PlayerPrefs.Save();
             }
 
             
-            
-        }
 
+        }
 
         else
         {
+            Audio.instance.Stop(battleTheme);
+            Audio.instance.Play(deathSound);
             gameOver.gameObject.SetActive(true);
             gameOver.HandleGameOver(statManager.floorNumber);
             gameOver.DisplayRelics();
+
+            PlayerPrefs.SetString("Menu", "True");
+            PlayerPrefs.Save();
 
         }
     }

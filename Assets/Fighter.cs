@@ -13,8 +13,10 @@ public class Fighter : MonoBehaviour
     private GameManager gameManager;
     public FighterHealthBar fighterHealthBar;
     public GameObject damageIndicator;
+    
 
     public int parryValue;
+    public int burnValue = 1;
 
     public Sprite strengthSprite;
     public Sprite vulnerableSprite;
@@ -31,18 +33,27 @@ public class Fighter : MonoBehaviour
     public Effect poison;
     public Effect punishment;
     public Effect lamp;
+    public Effect regen;
+    public Effect burn;
+    public Effect holyFlame;
+    public Effect counterPlay;
+    public Effect enrage;
+    
 
     public GameObject effectPrefab;
     public Transform effectParent;
 
-
+    private StatManager statManager;
     public bool isDefending;
     public bool isPlayer;
+
+    private bool ablaze;
 
     private void Awake()
     {
         enemy = GetComponent<Enemy>();
         gameManager = FindObjectOfType<GameManager>();
+        statManager = FindObjectOfType<StatManager>();
 
         currentHealth = maxHealth;
         fighterHealthBar.healthSlider.maxValue = maxHealth;
@@ -55,6 +66,8 @@ public class Fighter : MonoBehaviour
         weak.effectIcon = weakSprite;
         parry.effectIcon = parrySprite;
 
+        
+
 
         if (isPlayer)
             gameManager.DisplayHealth(currentHealth, currentHealth);
@@ -62,7 +75,14 @@ public class Fighter : MonoBehaviour
 
     public void TakeDamage(int value)
     {
-        if (isDefending) value = (int)(value * 0.5);
+        if (isDefending) 
+        {
+            value = (int)(value * 0.5);
+            if (gameManager.enemies[0].king)
+            {
+                gameManager.player.AddEffect(Effect.Type.burn, 2);
+            }
+        }
 
         Debug.Log($"dealt {value} damage");
 
@@ -72,33 +92,79 @@ public class Fighter : MonoBehaviour
         currentHealth -= value;
         UpdateHealthUI(currentHealth);
 
-        if (currentHealth <= 0)
+        if (!isPlayer && gameManager.enemies[0].king && currentHealth <= 35 && !ablaze) 
         {
-            //var leftSummons = gameManager.enemies.Where(s => s.isSummon).ToList();
+            var burn = Instantiate(damageIndicator, this.transform.position, Quaternion.identity, this.transform).GetComponent<DamageIndicator>();
+            indicator.SetDamageText("BLAZE UP");
+            currentHealth = 50;
+            burnValue = 2;
+            UpdateHealthUI(currentHealth);
+            ablaze = true;
+        }
 
-            foreach (var enemy in gameManager.enemies)
+        if (!isPlayer && gameManager.enemies[0].finalBoss && enrage.effectValue > 0)
+        {
+            AddEffect(Effect.Type.strength, 2);
+        }    
+
+        if (currentHealth <= 0 && isPlayer)
+        {
+            gameManager.EndFight(false);
+            Destroy(gameObject);
+            return;
+        }
+
+
+        if (currentHealth <= 0 && !enemy.isSummon)
+        {
+            var summons = gameManager.enemies.Where(e => e.isSummon).ToList();
+
+            if (enemy.mice)
             {
-                if (!enemy.isSummon)
-                {
-                    gameManager.EndFight(true);
-                    break;
-                }
-
-                else if (gameManager.enemies.Count == 0)
-                {
-                    gameManager.EndFight(true);
-                }
-
-
+                    var mice1 = Instantiate(enemy.summons[0], gameManager.enemyParent);
+                    var mice2 = Instantiate(enemy.summons[0], gameManager.enemy2Parent);
+                    var mice3 = Instantiate(enemy.summons[0], gameManager.enemy3Parent);
+                    gameManager.enemies.Add(mice1.GetComponent<Enemy>());
+                    gameManager.enemies.Add(mice2.GetComponent<Enemy>());
+                    gameManager.enemies.Add(mice3.GetComponent<Enemy>());
+                    mice1.GetComponent<Enemy>().miceSummon = true;
+                    mice2.GetComponent<Enemy>().miceSummon = true;
+                    mice3.GetComponent<Enemy>().miceSummon = true;
+                    enemy.mice = false;
             }
+            
+        
 
             if (isPlayer) gameManager.EndFight(false);
 
-        }
-                
+            Destroy(gameObject);
+            gameManager.enemies.Remove(enemy);
 
-         Destroy(gameObject);
-         gameManager.enemies.Remove(enemy);
+            if (gameManager.enemies.Count == 0 || summons.Count == gameManager.enemies.Count)
+            {
+                foreach (var summon in summons)
+                {
+                    Destroy(summon.gameObject);
+                }
+                gameManager.EndFight(true);
+            }
+
+
+
+        }
+        else if (currentHealth <= 0 && enemy.isSummon)
+        {
+            Destroy(gameObject);
+            gameManager.enemies.Remove(enemy);
+            
+        }
+
+        if (gameManager.enemies.Count == 0)
+        {
+            print("count");
+            gameManager.EndFight(true);
+        }
+
 
     }
 
@@ -133,6 +199,17 @@ public class Fighter : MonoBehaviour
             }
             strength.effectValue += value;
             strength.effectDisplay.DisplayEffect(strength);
+        }
+
+        if (type == Effect.Type.enrage)
+        {
+            if (enrage.effectValue <= 0)
+            {
+                //create new buff object
+                enrage.effectDisplay = Instantiate(effectPrefab, effectParent).GetComponent<EffectUI>();
+            }
+            enrage.effectValue += value;
+            enrage.effectDisplay.DisplayEffect(enrage);
         }
 
         if (type == Effect.Type.parry)
@@ -190,6 +267,46 @@ public class Fighter : MonoBehaviour
             lamp.effectDisplay.DisplayEffect(lamp);
             
         }
+
+        if (type == Effect.Type.regen)
+        {
+            if (regen.effectValue <= 0)
+            {
+                //create new buff object
+                regen.effectDisplay = Instantiate(effectPrefab, effectParent).GetComponent<EffectUI>();
+            }
+            regen.effectValue += value;
+            regen.effectDisplay.DisplayEffect(regen);
+        }
+
+        if (type == Effect.Type.burn)
+        {
+            if (burn.effectValue <= 0)
+            {
+                //create new buff object
+                burn.effectDisplay = Instantiate(effectPrefab, effectParent).GetComponent<EffectUI>();
+            }
+            burn.effectValue += value * burnValue;
+            burn.effectDisplay.DisplayEffect(burn);
+        }
+
+        if (type == Effect.Type.holyFlame)
+        {
+
+            gameManager.player.holyFlame.effectDisplay = Instantiate(effectPrefab, effectParent).GetComponent<EffectUI>();
+            gameManager.player.holyFlame.effectValue += burn.effectValue;
+            gameManager.player.burn.effectValue = 0;
+            gameManager.player.holyFlame.effectDisplay.DisplayEffect(holyFlame);
+            Destroy(gameManager.player.burn.effectDisplay.gameObject);
+        }
+
+        if (type == Effect.Type.counterPlay)
+        {
+            counterPlay.effectDisplay = Instantiate(effectPrefab, effectParent).GetComponent<EffectUI>();
+            counterPlay.effectValue += value;
+            counterPlay.effectDisplay.DisplayEffect(counterPlay);
+            counterPlay.effectDisplay.effectText.gameObject.SetActive(false);
+        }
     }
 
     public void EvaluateEffectsAtTurnEnd()
@@ -211,8 +328,18 @@ public class Fighter : MonoBehaviour
                 Destroy(weak.effectDisplay.gameObject);
         }
 
+
+
         if (vanish.effectValue > 0)
         {
+            var summons = gameManager.enemies.Where(e => e.isSummon).ToList();
+
+            if (enemy.lord && summons.Count > 0)
+            {
+                vanish.effectValue = 1;
+                vanish.effectDisplay.DisplayEffect(vanish);
+            }
+
             vanish.effectValue -= 1;
             vanish.effectDisplay.DisplayEffect(vanish);
 
@@ -222,7 +349,17 @@ public class Fighter : MonoBehaviour
 
         if (poison.effectValue > 0)
         {
-            TakeDamage(poison.effectValue);
+            var summons = gameManager.enemies.Where(e => e.isSummon).ToList();
+            if (poison.effectValue >= currentHealth)
+            {
+                currentHealth = 0;
+            }
+            else
+            {
+
+                TakeDamage(poison.effectValue);
+            }
+            
             poison.effectValue -= 1;
             poison.effectDisplay.DisplayEffect(poison);
 
@@ -241,9 +378,44 @@ public class Fighter : MonoBehaviour
                 AddEffect(Effect.Type.strength, 10);
                 Destroy(lamp.effectDisplay.gameObject);
             }
+        }
+
+        if (regen.effectValue > 0)
+        {
+            var heal = currentHealth + regen.effectValue;
+            if (heal >= maxHealth) heal = maxHealth;
+            UpdateHealthUI(heal);
+            regen.effectValue -= 1;
+            regen.effectDisplay.DisplayEffect(regen);
+
+            if (regen.effectValue <= 0)
+                Destroy(regen.effectDisplay.gameObject);
 
         }
 
+        if (burn.effectValue > 0)
+        {
+            var damage = burn.effectValue * burnValue;
+            if (statManager.PlayerHasRelic("Water Shield"))
+            {
+                damage = (int)(damage / 2);
+            }
+            TakeDamage(damage);
+            burn.effectValue -= 1;
+            burn.effectDisplay.DisplayEffect(burn);
+
+            if (burn.effectValue <= 0)
+                Destroy(burn.effectDisplay.gameObject);
+
+        }
+
+        if (holyFlame.effectValue > 0)
+        {
+            TakeDamage(holyFlame.effectValue);
+            holyFlame.effectDisplay.DisplayEffect(holyFlame);
+
+
+        }
 
     }
 

@@ -43,6 +43,12 @@ public class Mystery : MonoBehaviour
         Destroy(gameObject);
     }
 
+    public void LoadFinalBattle()
+    {
+        statManager.floorNumber = 3;
+        statManager.LoadBattleScene();
+    }    
+
     public void Fountain(int optionIndex)
     {
         if (optionIndex == 0)

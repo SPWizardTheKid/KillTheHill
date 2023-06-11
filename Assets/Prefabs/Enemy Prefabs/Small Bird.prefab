@@ -542,7 +542,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 440.6, y: 433.7}
+  m_SizeDelta: {x: 369.9, y: 433.7}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5046489461200326953
 CanvasRenderer:
@@ -609,26 +609,33 @@ MonoBehaviour:
     debuffAmount: 0
     type: 0
     chance: 1
-    icon: {fileID: 21300000, guid: db9e5ed11d4bf4b4bbb02de7116716da, type: 3}
+    icon: {fileID: 21300000, guid: 0a26effd9e9fbd348a6aaea837aaf81d, type: 3}
   - intentType: 0
     amount: 2
     quantity: 0
     debuffAmount: 0
     type: 0
     chance: 1
-    icon: {fileID: 21300000, guid: db9e5ed11d4bf4b4bbb02de7116716da, type: 3}
+    icon: {fileID: 21300000, guid: 0a26effd9e9fbd348a6aaea837aaf81d, type: 3}
   - intentType: 0
     amount: 3
     quantity: 0
     debuffAmount: 0
     type: 0
     chance: 1
-    icon: {fileID: 21300000, guid: db9e5ed11d4bf4b4bbb02de7116716da, type: 3}
+    icon: {fileID: 21300000, guid: 0a26effd9e9fbd348a6aaea837aaf81d, type: 3}
   summons: []
   turnNumber: 0
   targetPos: {fileID: 8138402469699953064, guid: 8e213cb63ec7b1a4e9d2f18c852de807,
     type: 3}
+  summonPivot: {fileID: 0}
   smallBird: 1
+  bigBird: 0
+  mice: 0
+  miceSummon: 0
+  king: 0
+  lord: 0
+  gabriel: 0
   isSummon: 0
   shuffleActions: 0
   midTurn: 0
@@ -655,6 +662,7 @@ MonoBehaviour:
   damageIndicator: {fileID: 5643496783363362436, guid: 13139328941370942a9c9ad08385b06d,
     type: 3}
   parryValue: 0
+  burnValue: 1
   strengthSprite: {fileID: 21300000, guid: 090df4408c64c85439d38486305b8830, type: 3}
   vulnerableSprite: {fileID: 21300000, guid: 518462c5cedac2b4a95aa55b05f04c87, type: 3}
   weakSprite: {fileID: 21300000, guid: a05c6128a3f385f42b58115fa776e6c8, type: 3}
@@ -691,12 +699,32 @@ MonoBehaviour:
     effectDisplay: {fileID: 0}
   poison:
     type: 8
-    effectIcon: {fileID: 0}
+    effectIcon: {fileID: 21300000, guid: 8fd229e3a19ff8042a3178809535aadc, type: 3}
     effectValue: 0
     effectDisplay: {fileID: 0}
   punishment:
     type: 0
     effectIcon: {fileID: 21300000, guid: 82ee3343c4029704dbe7c21ce9943ab9, type: 3}
+    effectValue: 0
+    effectDisplay: {fileID: 0}
+  lamp:
+    type: 0
+    effectIcon: {fileID: 0}
+    effectValue: 0
+    effectDisplay: {fileID: 0}
+  regen:
+    type: 11
+    effectIcon: {fileID: 21300000, guid: d57c68c0680c6764884c7754e2d5afe3, type: 3}
+    effectValue: 0
+    effectDisplay: {fileID: 0}
+  burn:
+    type: 12
+    effectIcon: {fileID: 21300000, guid: c4d34acf4a40e3c4d8865e668f6836fe, type: 3}
+    effectValue: 0
+    effectDisplay: {fileID: 0}
+  holyFlame:
+    type: 0
+    effectIcon: {fileID: 0}
     effectValue: 0
     effectDisplay: {fileID: 0}
   effectPrefab: {fileID: 4249612279881808265, guid: 3fdf5fdbf6119ed4e9cb75381a59fda2,

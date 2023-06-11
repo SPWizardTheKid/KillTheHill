@@ -3,13 +3,13 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Unity WebGL Player | unity-game-template11</title>
+    <title>Unity WebGL Player | Kill The HIll</title>
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
   </head>
   <body>
     <div id="unity-container" class="unity-desktop">
-      <canvas id="unity-canvas" width=960 height=600></canvas>
+      <canvas id="unity-canvas" width=1920 height=1080></canvas>
       <div id="unity-loading-bar">
         <div id="unity-logo"></div>
         <div id="unity-progress-bar-empty">
@@ -20,7 +20,7 @@
       <div id="unity-footer">
         <div id="unity-webgl-logo"></div>
         <div id="unity-fullscreen-button"></div>
-        <div id="unity-build-title">unity-game-template11</div>
+        <div id="unity-build-title">Kill The HIll</div>
       </div>
     </div>
     <script>
@@ -62,9 +62,9 @@
         frameworkUrl: buildUrl + "/WebGL Builds.framework.js.gz",
         codeUrl: buildUrl + "/WebGL Builds.wasm.gz",
         streamingAssetsUrl: "StreamingAssets",
-        companyName: "DefaultCompany",
-        productName: "unity-game-template11",
-        productVersion: "0.1",
+        companyName: "SPWizard",
+        productName: "Kill The HIll",
+        productVersion: "1.0",
         showBanner: unityShowBanner,
       };
 
@@ -93,10 +93,11 @@
       } else {
         // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
 
-        canvas.style.width = "960px";
-        canvas.style.height = "600px";
+        canvas.style.width = "1920px";
+        canvas.style.height = "1080px";
       }
 
+      canvas.style.background = "url('" + buildUrl + "/WebGL Builds.jpg.gz') center / cover";
       loadingBar.style.display = "block";
 
       var script = document.createElement("script");

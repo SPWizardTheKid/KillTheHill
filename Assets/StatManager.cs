@@ -37,6 +37,7 @@ public class StatManager : MonoBehaviour
             {
                 var statsJson = PlayerPrefs.GetString("Stats");
                 var stats = JsonUtility.FromJson<PlayerStats>(statsJson);
+                floorNumber = stats.floorNumber;
                 character = stats.character;
                 goldAmount = stats.goldAmount;
                 playerDeck = stats.playerDeck;
@@ -48,6 +49,7 @@ public class StatManager : MonoBehaviour
 
                 gameManager.player.currentHealth = playerCurrentHealth;
                 gameManager.player.maxHealth = playerMaxHealth;
+                gameManager.player.fighterHealthBar.healthSlider.maxValue = playerMaxHealth;
                 gameManager.player.UpdateHealthUI(playerCurrentHealth);
                 gameManager.DisplayHealth(playerCurrentHealth, gameManager.player.maxHealth);
                 playerStatsUI.DisplayRelics();
@@ -67,6 +69,7 @@ public class StatManager : MonoBehaviour
             {
                 var statsJson = PlayerPrefs.GetString("Stats");
                 var stats = JsonUtility.FromJson<PlayerStats>(statsJson);
+                floorNumber = stats.floorNumber;
                 character = stats.character;
                 goldAmount = stats.goldAmount;
                 playerDeck = stats.playerDeck;

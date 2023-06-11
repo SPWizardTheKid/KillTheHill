@@ -16,6 +16,11 @@ namespace Map
         }
 
         public MapManager mapManager;
+        public MainSceneManager manager;
+        public StatManager statManager;
+        public Sprite kingSprite;
+        public Sprite lordSprite;
+        public Sprite gabrielSprite;
         public MapOrientation orientation;
 
         [Tooltip(
@@ -112,7 +117,34 @@ namespace Map
             var backgroundObject = new GameObject("Background");
             backgroundObject.transform.SetParent(mapParent.transform);
             var bossNode = MapNodes.FirstOrDefault(node => node.Node.nodeType == NodeType.Boss);
-            mapManager.bossName = bossNode.Blueprint.name;
+
+           
+
+            var confBosses = mapManager.config.nodeBlueprints.Where(node => node.nodeType == NodeType.Boss).ToList();
+            var firstFloorNodes = confBosses.Where(node => node.name != "Gabriel").ToList();
+            var gabrielNode = confBosses.Where(node => node.name == "Gabriel").FirstOrDefault();
+
+            
+
+            if (statManager.floorNumber == 1)
+            {
+                //var rand = firstFloorNodes.Random();
+                //bossNode.Blueprint = rand;
+                
+
+                manager.bossName = bossNode.Blueprint.name;
+            }
+            else if (statManager.floorNumber == 2)
+            {
+                bossNode.Blueprint = gabrielNode;
+                bossNode.Blueprint.sprite = gabrielSprite;
+                manager.bossName = gabrielNode.name;
+            }
+            else
+            {
+                bossNode = MapNodes.FirstOrDefault(node => node.Node.nodeType == NodeType.Boss);
+            }
+
             var span = m.DistanceBetweenFirstAndLastLayers();
             backgroundObject.transform.localPosition = new Vector3(bossNode.transform.localPosition.x, span / 2f, 0f);
             backgroundObject.transform.localRotation = Quaternion.identity;
@@ -149,6 +181,28 @@ namespace Map
             var mapNodeObject = Instantiate(nodePrefab, mapParent.transform);
             var mapNode = mapNodeObject.GetComponent<MapNode>();
             var blueprint = GetBlueprint(node.blueprintName);
+
+            var confBosses = mapManager.config.nodeBlueprints.Where(node => node.nodeType == NodeType.Boss).ToList();
+            var firstFloorNodes = confBosses.Where(node => node.name != "Gabriel").ToList();
+            var gabrielNode = confBosses.Where(node => node.name == "Gabriel").FirstOrDefault();
+
+
+
+            if (statManager.floorNumber == 2 && blueprint.nodeType == NodeType.Boss)
+            {
+
+                blueprint = gabrielNode;
+                blueprint.sprite = gabrielSprite;
+            }
+            else if (statManager.floorNumber == 1 && blueprint.nodeType == NodeType.Boss)
+            {
+                var rand = firstFloorNodes.Random();
+                blueprint = rand;
+                if (blueprint.name == "Golem King") blueprint.sprite = kingSprite;
+                else if (blueprint.name == "Lord of Shades") blueprint.sprite = lordSprite;
+            }
+            
+
             mapNode.SetUp(node, blueprint);
             mapNode.transform.localPosition = node.position;
             return mapNode;

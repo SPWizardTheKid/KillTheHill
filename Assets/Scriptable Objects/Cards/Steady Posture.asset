@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cardName: Steady Posture
   cardDescription: Your Parries can deflect 5 more damage this combat.
-  cardSprite: {fileID: 0}
+  cardSprite: {fileID: 21300000, guid: 6670b91c4342f274cad94a7fb439902d, type: 3}
   cardType: Skill
   amount: 5
   effectAmount: 0

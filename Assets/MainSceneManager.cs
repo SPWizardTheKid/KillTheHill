@@ -15,16 +15,27 @@ public class MainSceneManager : MonoBehaviour
     private List<CardUI> cardsInDeck;
     public ScrollNonUI scrollNonUI;
     public PlayerStatsUI playerStatsUI;
+    public GameOver gameOver;
 
-    
+    [Header("Audio")]
+    public AudioClip clickSound;
+    public AudioClip embarkSound;
+    public AudioClip mapBattle;
+    public AudioClip mapMystery;
 
+    public Card judgementCut;
+    public string bossName;
+    public Mystery finalScene;
     public Menu mainMenu;
     public CharacterSelect characterSelectionScreen;
     public GameObject restSite;
+    public GameObject settings;
     public Shop shop;
     public Transform mysteryParent;
     public List<Mystery> possibleMysteries = new List<Mystery>();
-
+    private bool admin = false;
+    public bool judgement;
+    public GameObject check;
 
     private void Awake()
     {
@@ -34,8 +45,34 @@ public class MainSceneManager : MonoBehaviour
 
     private void Start()
     {
-        HandleMainMenu();
-        StartCoroutine(LateStart(0.1f));
+        
+
+        if (statManager.floorNumber >= 3)
+        {
+            Instantiate(finalScene.gameObject, mysteryParent);
+        }
+        else
+        {
+            HandleMainMenu();
+            StartCoroutine(LateStart(0.1f));
+        }
+        
+    }
+
+    public void Admin()
+    {
+        if (!admin)
+        {
+            check.gameObject.SetActive(true);
+            judgement = true;
+            admin = true;
+        }
+        else
+        {
+            check.gameObject.SetActive(false);
+            judgement = false;
+            admin = false;
+        }
     }
 
     private IEnumerator LateStart(float waitTime)
@@ -50,13 +87,27 @@ public class MainSceneManager : MonoBehaviour
         playerStatsUI.gameObject.SetActive(true);
         statManager.character = character;
         statManager.playerDeck = character.startingDeck;
+        if (judgement) statManager.character.startingDeck.Add(judgementCut);
         statManager.relics.Clear();
         statManager.relics.Add(character.startingRelic);
         playerStatsUI.DisplayRelics();
         playerStatsUI.heroName.text = "The " + character.name;
-        if (PlayerPrefs.HasKey("Map")) PlayerPrefs.DeleteKey("Map");
+        playerStatsUI.goldAmountText.text = "100";
+        Reset();
+
         mapManager.GenerateNewMap();
-        
+
+        Audio.instance.Play(embarkSound);
+
+    }
+
+    private void Reset()
+    {
+        statManager.SaveStats();
+        PlayerPrefs.DeleteAll();
+        statManager.ResetSavedValues();
+        statManager.playerStatsUI.DisplayRelics();
+        statManager.floorNumber = 1;
     }
 
     public void HandleMainMenu()
@@ -82,6 +133,8 @@ public class MainSceneManager : MonoBehaviour
     {
         mainMenu.gameObject.SetActive(false);
         playerStatsUI.gameObject.SetActive(true);
+
+        Audio.instance.Play(clickSound);
     }
 
     public void NewGame()
@@ -89,21 +142,29 @@ public class MainSceneManager : MonoBehaviour
         mainMenu.gameObject.SetActive(false);
         playerStatsUI.gameObject.SetActive(false);
         characterSelectionScreen.gameObject.SetActive(true);
+        Audio.instance.Play(clickSound);
     }
 
     public void Settings()
     {
-
+        Audio.instance.Play(clickSound);
+        settings.SetActive(true);
     }
 
     public void Quit()
     {
+        Audio.instance.Play(clickSound);
         Application.Quit();
     }
 
     private void OnApplicationQuit()
     {
         PlayerPrefs.DeleteKey("LoadMenu");
+    }
+
+    public void Close()
+    {
+        settings.SetActive(false);
     }
 
     public void LoadRandomMystery()
@@ -115,15 +176,19 @@ public class MainSceneManager : MonoBehaviour
         {
             case 0:
                 Instantiate(possibleMysteries[0].gameObject, mysteryParent);
+                Audio.instance.Play(mapMystery);
                 break;
             case 1:
                 Instantiate(possibleMysteries[1].gameObject, mysteryParent);
+                Audio.instance.Play(mapMystery);
                 break;
             case 2:
                 Instantiate(possibleMysteries[2].gameObject, mysteryParent);
+                Audio.instance.Play(mapMystery);
                 break;
             case 3:
                 Instantiate(possibleMysteries[3].gameObject, mysteryParent);
+                Audio.instance.Play(mapMystery);
                 break;
             case 4:
                 statManager.LoadBattleScene();
@@ -132,12 +197,15 @@ public class MainSceneManager : MonoBehaviour
                 statManager.LoadBattleScene();
                 break;
             case 6:
+                Audio.instance.Play(mapMystery);
                 LoadShopScene();
                 break;
             case 7:
+                Audio.instance.Play(mapMystery);
                 LoadShopScene();
                 break;
             case 8:
+                Audio.instance.Play(mapMystery);
                 LoadChestScene();
                 break;
 

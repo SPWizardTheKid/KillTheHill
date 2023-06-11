@@ -25,7 +25,7 @@ namespace Map
         public Image visitedCircleImage;
 
         public Node Node { get; private set; }
-        public NodeBlueprint Blueprint { get; private set; }
+        public NodeBlueprint Blueprint { get; set; }
 
         private float initialScale;
         private const float HoverScaleFactor = 1.2f;

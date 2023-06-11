@@ -541,7 +541,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: -48.3}
   m_SizeDelta: {x: 500, y: 500}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5046489461200326953
@@ -614,7 +614,14 @@ MonoBehaviour:
   turnNumber: 0
   targetPos: {fileID: 8138402469699953064, guid: 8e213cb63ec7b1a4e9d2f18c852de807,
     type: 3}
+  summonPivot: {fileID: 0}
   smallBird: 0
+  bigBird: 0
+  mice: 0
+  miceSummon: 0
+  king: 0
+  lord: 0
+  gabriel: 0
   isSummon: 0
   shuffleActions: 1
   midTurn: 0
@@ -641,6 +648,7 @@ MonoBehaviour:
   damageIndicator: {fileID: 5643496783363362436, guid: 13139328941370942a9c9ad08385b06d,
     type: 3}
   parryValue: 0
+  burnValue: 1
   strengthSprite: {fileID: 0}
   vulnerableSprite: {fileID: 21300000, guid: 518462c5cedac2b4a95aa55b05f04c87, type: 3}
   weakSprite: {fileID: 21300000, guid: a05c6128a3f385f42b58115fa776e6c8, type: 3}
@@ -651,12 +659,12 @@ MonoBehaviour:
     effectValue: 0
     effectDisplay: {fileID: 0}
   vulnerable:
-    type: 0
+    type: 3
     effectIcon: {fileID: 0}
     effectValue: 0
     effectDisplay: {fileID: 0}
   weak:
-    type: 0
+    type: 4
     effectIcon: {fileID: 0}
     effectValue: 0
     effectDisplay: {fileID: 0}
@@ -681,6 +689,26 @@ MonoBehaviour:
     effectValue: 0
     effectDisplay: {fileID: 0}
   punishment:
+    type: 0
+    effectIcon: {fileID: 0}
+    effectValue: 0
+    effectDisplay: {fileID: 0}
+  lamp:
+    type: 0
+    effectIcon: {fileID: 0}
+    effectValue: 0
+    effectDisplay: {fileID: 0}
+  regen:
+    type: 11
+    effectIcon: {fileID: 21300000, guid: d57c68c0680c6764884c7754e2d5afe3, type: 3}
+    effectValue: 0
+    effectDisplay: {fileID: 0}
+  burn:
+    type: 12
+    effectIcon: {fileID: 21300000, guid: c4d34acf4a40e3c4d8865e668f6836fe, type: 3}
+    effectValue: 0
+    effectDisplay: {fileID: 0}
+  holyFlame:
     type: 0
     effectIcon: {fileID: 0}
     effectValue: 0

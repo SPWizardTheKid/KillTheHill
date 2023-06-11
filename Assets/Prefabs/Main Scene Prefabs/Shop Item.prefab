@@ -957,6 +957,8 @@ MonoBehaviour:
   itemType: {fileID: 5044441430043211151}
   priceText: {fileID: 2853570001429019418}
   rarityBorder: {fileID: 5983425939095891005}
+  buySound: {fileID: 8300000, guid: 5d33185b9b84fa947b7814f0f68d8fc4, type: 3}
+  hover: {fileID: 8300000, guid: 1d60392ef4f3e6949ac4537af7ffc440, type: 3}
   price: 0
   itemIndex: 0
   isCard: 0

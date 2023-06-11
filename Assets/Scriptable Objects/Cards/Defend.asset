@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: Defend
   m_EditorClassIdentifier: 
   cardName: Defend
-  cardDescription: Receive reduced damage this turn
-  cardSprite: {fileID: 21300000, guid: f8b8257a8cfa50c49a0dcbbfbf742ba8, type: 3}
+  cardDescription: Receive reduced damage this turn.
+  cardSprite: {fileID: 21300000, guid: a831bd1228c4e494780bcbe03ab38bd3, type: 3}
   cardType: Skill
   amount: 0
-  rarity: {r: 0.29383236, g: 0.8773585, b: 0.8773585, a: 1}
+  effectAmount: 0
+  rarity: {r: 1, g: 1, b: 1, a: 1}

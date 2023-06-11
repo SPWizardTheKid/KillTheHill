@@ -47,7 +47,7 @@ public class CharacterSelect : MonoBehaviour
 
     public void Select(int index)
     {
-        
+        Audio.instance.Play(mainSceneManager.clickSound);
         if (index == 0)
         {
             selectSwordsman.interactable = false;

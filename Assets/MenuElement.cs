@@ -5,10 +5,11 @@ using TMPro;
 
 public class MenuElement : MonoBehaviour
 {
-
+    public AudioClip hoverSound;
 
     public void PointerEnter()
     {
+        Audio.instance.Play(hoverSound);
         transform.localScale = new Vector2(1.1f, 1.1f);
 
         

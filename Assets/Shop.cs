@@ -33,6 +33,7 @@ public class Shop : MonoBehaviour
 
         for (int i = 0; i < 4; i++)
         {
+            if (i >= statManager.cardLibrary.Count) break;
             var shopCard = Instantiate(shopItem, cardGroup);
             shopCard.itemIndex += i;
             shopCard.isCard = true;
@@ -46,17 +47,21 @@ public class Shop : MonoBehaviour
                 price += 20;
             }
 
-
+            
             shopCard.DisplayCard(statManager.cardLibrary[i]);
             shopCard.DisplayPrice(price);
         }
 
         for (int i = 0; i < 2; i++)
         {
+            if (i >= statManager.relicLibrary.Count) break;
+
             var shopRelic = Instantiate(shopItem, relicGroup);
             var price = Random.Range(80, 150);
             shopRelic.itemIndex += i;
             shopRelic.isRelic = true;
+
+            
             shopRelic.DisplayRelic(statManager.relicLibrary[i]);
             shopRelic.DisplayPrice(price);
 

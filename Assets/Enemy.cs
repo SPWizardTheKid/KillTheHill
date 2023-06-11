@@ -2,6 +2,7 @@ using Map;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,8 +15,17 @@ public class Enemy : MonoBehaviour
     public int turnNumber;
     public Transform targetPos;
 
+    public GameObject summonPivot;
+    private List<Transform> positions = new List<Transform>();
+
     public bool smallBird;
     public bool bigBird;
+    public bool mice;
+    public bool miceSummon;
+    public bool king;
+    public bool lord;
+    public bool gabriel;
+    public bool finalBoss;
 
     public bool isSummon;
     public bool shuffleActions;
@@ -29,26 +39,45 @@ public class Enemy : MonoBehaviour
     public TMP_Text intentValue;
     public EffectUI intentUi;
 
-
-    private Vector3 initialPos;
+    private int turnsWithoutSummons;
     private Fighter player;
     private GameManager gameManager;
     private Animator animator;
 
     private void Awake()
     {
-        LoadEnemy();
-    }
-
-    private void LoadEnemy()
-    {
         gameManager = FindObjectOfType<GameManager>();
         player = gameManager.player;
         currentEnemy = GetComponent<Fighter>();
         animator = GetComponent<Animator>();
-        initialPos = transform.position;
+
+        summonPivot = GameObject.FindGameObjectWithTag("Pivot");
+
+
+        foreach (Transform transform in summonPivot.transform)
+        {
+            positions.Add(transform);
+        }
 
         if (smallBird) currentEnemy.AddEffect(Effect.Type.vulnerable, 3);
+
+        if (shuffleActions) GenerateTurns();
+    }
+
+    private void Start()
+    {
+        //LoadEnemy();
+        if (gabriel) animator.SetBool("Gabriel", true);
+
+    }
+
+
+    public void LoadEnemy()
+    {
+        gameManager = FindObjectOfType<GameManager>();
+        player = gameManager.player;
+        currentEnemy = GetComponent<Fighter>();
+        
 
         if (shuffleActions) GenerateTurns();
 
@@ -75,7 +104,7 @@ public class Enemy : MonoBehaviour
                 break;
             case EnemyAction.IntentType.AttackDebuff:
                 StartCoroutine(AttackPlayer());
-                StartCoroutine(ApplyEffect());
+                StartCoroutine(ApplyDebuff());
                 ApplyDebuffToPlayer(turns[turnNumber].type);
                 break;
             case EnemyAction.IntentType.Summon:
@@ -90,14 +119,20 @@ public class Enemy : MonoBehaviour
 
     public void GenerateTurns()
     {
+
         foreach (EnemyAction action in enemyActions)
         {
-            if (action.chance < 1) action.chance = 1;
+            
             for (int i = 0; i < action.chance; i++)
             {
                 turns.Add(action);
             }
         }
+
+        //foreach (var turn in turns)
+        //{
+        //    if (turn.chance < 1) turn.chance = 1;
+        //}
         turns.Shuffle();
     }
 
@@ -116,10 +151,22 @@ public class Enemy : MonoBehaviour
             for (int i = 0; i < turns[turnNumber].quantity; i++)
             {
                 animator.Play("EnemyAttack");
+                Audio.instance.Play(gameManager.attackSound);
                 yield return new WaitForSeconds(0.5f);
                 if (player.parry.effectValue > 0 && temp <= player.parryValue)
                 {
+                    Audio.instance.Play(gameManager.parrySound);
                     currentEnemy.TakeDamage(temp);
+                    if (currentEnemy.currentHealth <= 0)
+                    {
+                        gameManager.enemies.Remove(this);
+                        Destroy(gameObject);
+                        if (gameManager.enemies.Count == 0)
+                        {
+                            gameManager.EndFight(true);
+                        }
+                        midTurn = false;
+                    }    
                     totalDamage = 0;
                 }
                 player.TakeDamage(totalDamage);
@@ -130,10 +177,22 @@ public class Enemy : MonoBehaviour
         else
         {
             animator.Play("EnemyAttack");
+            Audio.instance.Play(gameManager.attackSound);
             yield return new WaitForSeconds(0.5f);
             if (player.parry.effectValue > 0 && totalDamage <= player.parryValue)
             {
+                Audio.instance.Play(gameManager.parrySound);
                 currentEnemy.TakeDamage(totalDamage);
+                if (currentEnemy.currentHealth <= 0)
+                {
+                    gameManager.enemies.Remove(this);
+                    Destroy(gameObject);
+                    if (gameManager.enemies.Count == 0)
+                    {
+                        gameManager.EndFight(true);
+                    }
+                    midTurn = false;
+                }
                 totalDamage = 0;
             }
             player.TakeDamage(totalDamage);
@@ -149,6 +208,10 @@ public class Enemy : MonoBehaviour
         yield return new WaitForSeconds(1f);
         WrapUpTurn();
     }
+    private IEnumerator ApplyDebuff()
+    {
+        yield return new WaitForSeconds(1f);
+    }
 
     private void ApplyBuffToSelf(Effect.Type type)
     {
@@ -159,23 +222,52 @@ public class Enemy : MonoBehaviour
         if (player == null)
             LoadEnemy();
 
-        player.AddEffect(type, turns[turnNumber].debuffAmount);
+        var multiply = turns[turnNumber].quantity;
+        if (multiply < 1) multiply = 1;
+
+        if (type == Effect.Type.burn)
+        {
+            for (int i = 0; i < multiply; i++)
+            {
+                player.AddEffect(type, turns[turnNumber].debuffAmount * currentEnemy.burnValue);
+            }
+        }
+        else
+        {
+            for (int i = 0; i < multiply; i++)
+            {
+                player.AddEffect(type, turns[turnNumber].debuffAmount);
+            }
+            
+        }
+        
     }
 
 
     private void Summon()
     {
         if (summons.Count == 0) return;
-
-        foreach (var summon in summons)
-        {
-            var newSummon = Instantiate(summon, gameManager.summonParent);
-            //newSummon.gameObject.SetActive(true);
-            newSummon.GetComponent<Enemy>().isSummon = true;
-            newSummon.GetComponent<Fighter>().AddEffect(Effect.Type.summon, 1);
-            gameManager.enemies.Add(newSummon.GetComponent<Enemy>());
+        if (!lord)
+        { 
+            foreach (var summon in summons)
+            {
+                var newSummon = Instantiate(summon, gameManager.summonParent);
+                //newSummon.gameObject.SetActive(true);
+                newSummon.GetComponent<Enemy>().isSummon = true;
+                newSummon.GetComponent<Fighter>().AddEffect(Effect.Type.summon, 1);
+                gameManager.enemies.Add(newSummon.GetComponent<Enemy>());
+            }
         }
-
+        else
+        {
+            for (int i = 0; i < summons.Count; i++)
+            {
+                var newSummon = Instantiate(summons[i], positions[i].position, Quaternion.identity, positions[i].transform);
+                newSummon.GetComponent<Enemy>().isSummon = true;
+                newSummon.GetComponent<Fighter>().AddEffect(Effect.Type.summon, 1);
+                gameManager.enemies.Add(newSummon.GetComponent<Enemy>());
+            }
+        }
     }
 
     public void Defend()
@@ -185,10 +277,10 @@ public class Enemy : MonoBehaviour
 
     public void DisplayIntent()
     {
+
+        //if (turns.Count == 0) LoadEnemy();       
         if (currentEnemy == null) return;
 
-        if (turns.Count == 0) LoadEnemy();
-        
 
         intentValue.enabled = true;
         intentIcon.sprite = turns[turnNumber].icon;
@@ -197,7 +289,8 @@ public class Enemy : MonoBehaviour
             || turns[turnNumber].intentType == EnemyAction.IntentType.Summon
             || turns[turnNumber].type == Effect.Type.vanish
             || turns[turnNumber].type == Effect.Type.punishment
-            || turns[turnNumber].type == Effect.Type.lamp) intentValue.enabled = false;
+            || turns[turnNumber].type == Effect.Type.lamp 
+            ||turns[turnNumber].type == Effect.Type.holyFlame) intentValue.enabled = false;
 
         if (turns[turnNumber].intentType == EnemyAction.IntentType.Attack || turns[turnNumber].intentType == EnemyAction.IntentType.AttackDebuff)
         {
@@ -231,9 +324,17 @@ public class Enemy : MonoBehaviour
         
     }
 
-    private void WrapUpTurn()
+    public void WrapUpTurn()
     {
+        var summons = gameManager.enemies.Where(e => e.isSummon).ToList();
+
         turnNumber++;
+
+        if (lord && summons.Count <= 0 && turnsWithoutSummons > 2)
+        {
+            turnNumber = 0;
+            turnsWithoutSummons = 0;
+        }
 
         if (turnNumber == turns.Count && smallBird)
         {
@@ -250,8 +351,28 @@ public class Enemy : MonoBehaviour
             }
         }
 
+        
+
+        if (lord && summons.Count > 0)
+        {
+            turnNumber = 1;
+        }    
+
+        else if (lord && summons.Count <= 0 && turnsWithoutSummons < 2)
+        {
+            turnNumber = 2;
+            turnsWithoutSummons++;
+            print(turnsWithoutSummons);
+
+        }
+        
 
         if (turnNumber == turns.Count && bigBird)
+        {
+            turnNumber = 1;
+        }
+
+        if (turnNumber == turns.Count && finalBoss)
         {
             turnNumber = 1;
         }
